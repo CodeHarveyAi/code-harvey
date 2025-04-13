@@ -54,7 +54,7 @@ TEXT: ${text}`;
       const rewrittenText = data?.content?.[0]?.text?.trim();
 
       if (!rewrittenText) {
-        return res.status(500).json({ error: 'Claude returned no content' });
+        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
       }
 
       return res.status(200).json({ rewrite: rewrittenText });
@@ -95,7 +95,7 @@ TEXT: ${text}`;
       const rewrittenText = data?.choices?.[0]?.message?.content?.trim();
 
       if (!rewrittenText) {
-        return res.status(500).json({ error: 'OpenAI returned no content' });
+        return res.status(200).json({ rewrite: 'ChatGPT is on a coffee break... try again shortly!' });
       }
 
       return res.status(200).json({ rewrite: rewrittenText });
