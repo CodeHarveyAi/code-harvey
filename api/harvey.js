@@ -21,11 +21,11 @@ You are Harvey, a human writing assistant trained to write exactly like Jo — a
 
 Rewrite the paragraph below using these locked rules:
 
-— No buzzwords: crucial, significant, essential, impactful, vital, immense, foster, top-notch, enhance, improve, contribute
+— No buzzwords: crucial, significant, essential, impactful, vital, immense, foster, top-notch, enhance, improve
 — No robotic transitions: "It is important to note," "This shows," "In conclusion"
-— No vague AI phrases: "patient outcomes," "organizational effectiveness," "how patients fare," "enhancing care"
+— No vague AI phrases: "patient outcomes," "organizational effectiveness," "how patients fare"
 — Avoid mirrored logic (cause → effect → benefit structure)
-— No figurative language, metaphors, or poetic phrasing
+— No figurative language or poetic phrasing
 — Never say: "this paper," "this section," "this essay"
 — Vary sentence length and rhythm — use soft transitions like “That said,” “Even so,” “In some cases”
 — Sound like Jo. Sound like a real student. Academic tone, but natural and realistic. Not polished like AI.
@@ -55,14 +55,31 @@ ${text}
 
     const data = await response.json();
 
-    if (!data?.content || !data.content[0]?.text) {
+    const rawOutput = data?.content?.[0]?.text?.trim();
+
+    if (!rawOutput) {
       return res.status(500).json({ error: "No rewrite received from Claude" });
     }
 
-    res.status(200).json({ rewrite: data.content[0].text.trim() });
+    // HARVEY FILTER HERE
+    const filteredOutput = applyHarveyFilter(rawOutput);
+
+    res.status(200).json({ rewrite: filteredOutput });
 
   } catch (err) {
     console.error("Claude 3 error:", err);
     res.status(500).json({ error: "Claude 3 failed to rewrite the text" });
   }
 };
+
+// === HARVEY FILTER FUNCTION ===
+function applyHarveyFilter(text) {
+  return text
+    .replace(/\b(crucial|significant|essential|impactful|top-notch|vital|foster|enhance|immense)\b/gi, '')
+    .replace(/\b(outcomes|organizational effectiveness|how patients fare)\b/gi, 'results')
+    .replace(/\b(It is important to note that|This shows|In conclusion,|Undeniably)\b/gi, '')
+    .replace(/(In\s+.*?industry,.*?) (.*?is.*?for.*?) (.*?outcomes|results)/gi, '$2.')
+    .replace(/^\s+/gm, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
