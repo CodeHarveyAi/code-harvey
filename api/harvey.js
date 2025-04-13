@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST requests allowed' });
@@ -60,4 +58,3 @@ Rewrite the following text in a natural, readable academic style that avoids AI 
     res.status(500).json({ error: "Failed to generate response" });
   }
 };
-
