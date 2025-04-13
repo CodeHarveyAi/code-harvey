@@ -42,7 +42,7 @@ TEXT: ${text}`;
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-sonnet-20240229',
+          model: 'claude-3-5-haiku-20241022',
           max_tokens: 1000,
           messages: [
             { role: 'user', content: claudePrompt }
@@ -54,7 +54,29 @@ TEXT: ${text}`;
       const rewrittenText = data?.content?.[0]?.text?.trim();
 
       if (!rewrittenText) {
-        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
+        console.warn("Claude failed, falling back to GPT");
+
+        const fallbackPrompt = `You are Harvey, a human academic writing assistant. Rewrite the text to sound like a thoughtful, real student writing in an academic voice. Follow human pacing and varied structure. Avoid buzzwords, robotic symmetry, and overly polished logic. TEXT: ${text}`;
+
+        const fallback = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4',
+            temperature: 0.7,
+            messages: [
+              { role: 'system', content: fallbackPrompt }
+            ]
+          })
+        });
+
+        const fallbackData = await fallback.json();
+        const backupText = fallbackData?.choices?.[0]?.message?.content?.trim();
+
+        return res.status(200).json({ rewrite: backupText || 'All models failed. Try again later.' });
       }
 
       return res.status(200).json({ rewrite: rewrittenText });
@@ -83,7 +105,7 @@ TEXT: ${text}`;
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4',
           temperature: 0.7,
           messages: [
             { role: 'system', content: chatPrompt }
