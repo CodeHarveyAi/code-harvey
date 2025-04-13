@@ -15,54 +15,23 @@
     }
 
     h2 {
-      margin-bottom: 30px;
+      margin-bottom: 10px;
       color: #222;
-    }
-
-    .container {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      width: 100%;
-      max-width: 1000px;
-      margin-bottom: 20px;
-    }
-
-    .field {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      font-weight: bold;
-      margin-bottom: 6px;
-      color: #333;
-    }
-
-    textarea {
-      width: 100%;
-      height: 200px;
-      padding: 12px;
-      font-size: 14px;
-      resize: vertical;
-      background-color: white;
-      border: 1px solid #ccc;
-      color: #111;
-    }
-
-    textarea::placeholder {
-      color: #888;
     }
 
     .tone-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       width: 100%;
       max-width: 1000px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #333;
+      white-space: nowrap;
     }
 
     select {
@@ -71,85 +40,23 @@
       font-size: 14px;
     }
 
-    .buttons {
-      display: flex;
-      justify-content: flex-start;
-      gap: 10px;
-      width: 100%;
-      max-width: 1000px;
-    }
-
-    button {
+    .tone-row button {
+      padding: 10px 16px;
+      font-size: 14px;
       background-color: #0726c3;
       color: white;
       border: none;
-      padding: 10px 16px;
-      font-size: 14px;
       cursor: pointer;
       border-radius: 4px;
     }
 
-    button:hover {
+    .tone-row button:hover {
       background-color: #04188a;
     }
 
-    .copy-btn-wrapper {
+    .container {
       display: flex;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
-  </style>
-</head>
-<body>
-  <h2>Harvey Rewrite Tool</h2>
-
-  <div class="container">
-    <div class="field">
-      <label for="inputText">Original Text</label>
-      <textarea id="inputText" placeholder="Paste up to 500 words here..."></textarea>
-    </div>
-
-    <div class="field">
-      <label for="outputText">Your rewritten version will appear here</label>
-      <textarea id="outputText" readonly></textarea>
-      <div class="copy-btn-wrapper">
-        <button onclick="copyOutput()">Copy</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="tone-row">
-    <label for="toneSelector">Choose a tone style:</label>
-    <select id="toneSelector">
-      <option value="standard">Standard</option>
-      <option value="academic">Academic</option>
-      <option value="professional">Professional</option>
-    </select>
-    <button onclick="rewriteText()">Rewrite</button>
-  </div>
-
-  <script>
-    async function rewriteText() {
-      const inputText = document.getElementById('inputText').value;
-      const tone = document.getElementById('toneSelector').value;
-
-      const response = await fetch('/api/harvey', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: inputText, tone: tone })
-      });
-
-      const result = await response.json();
-      document.getElementById('outputText').value = result.rewrite || 'Error: Could not generate response.';
-    }
-
-    function copyOutput() {
-      const output = document.getElementById('outputText');
-      output.select();
-      document.execCommand('copy');
-    }
-  </script>
-</body>
-</html>
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 1000px;
