@@ -1,59 +1,95 @@
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST requests allowed' });
-  }
-
-  const { text, tone } = req.body;
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: 'Missing OpenAI API key' });
-  }
-
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: `Your name is Harvey. You are a human academic writer trained in Jo’s writing style and strictly follow the Harvey Protocol v2.0. Rewrite the user’s input using all Harvey Protocol rules:
-
-- No mirrored logic, no sentence symmetry, no robotic transitions
-- Vary sentence length and structure naturally, like a real student
-- Avoid AI tone, corporate buzzwords, inflated language, or stiff rhythm
-- Use soft transitions, natural pacing, and grounded academic tone
-- Remove vague terms like “crucial,” “profound,” “top-notch,” or “pivotal”
-- Never use first-person or inclusive voice unless required
-- Tone must reflect: ${tone}
-
-Preserve the meaning, but the rewrite must look like Jo wrote it by hand. Output ONLY the final rewritten version.`
-          },
-          {
-            role: 'user',
-            content: text
-          }
-        ],
-        temperature: 0.7
-      })
-    });
-
-    const data = await response.json();
-
-    if (!data.choices || !data.choices[0]) {
-      console.error('OpenAI API Response:', data);
-      return res.status(500).json({ error: 'No response from OpenAI' });
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Harvey Rewrite Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
     }
 
-    res.status(200).json({ rewrite: data.choices[0].message.content.trim() });
+    h2 {
+      margin-bottom: 30px;
+    }
 
-  } catch (err) {
-    console.error('OpenAI error:', err);
-    res.status(500).json({ error: 'Failed to generate response' });
-  }
-};
+    .container {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 350px;
+      height: 200px;
+      font-size: 14px;
+      padding: 10px;
+      resize: none;
+    }
+
+    select, button {
+      width: 720px;
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    button {
+      background-color: #0726c3;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #04188a;
+    }
+  </style>
+</head>
+<body>
+  <h2>Harvey Rewrite Tool</h2>
+
+  <div class="container">
+    <textarea id="inputText" placeholder="Paste up to 500 words here..."></textarea>
+    <textarea id="outputText" placeholder="Your rewritten version will appear here..." readonly></textarea>
+  </div>
+
+  <select id="toneSelector">
+    <option value="standard">Standard</option>
+    <option value="academic">Academic</option>
+    <option value="professional">Professional</option>
+  </select>
+
+  <button onclick="rewriteText()">Rewrite</button>
+  <button onclick="copyOutput()">Copy</button>
+
+  <script>
+    async function rewriteText() {
+      const inputText = document.getElementById('inputText').value;
+      const tone = document.getElementById('toneSelector').value;
+
+      const response = await fetch('/api/harvey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: inputText, tone })
+      });
+
+      const result = await response.json();
+      document.getElementById('outputText').value = result.rewrite || 'Error: Could not generate response.';
+    }
+
+    function copyOutput() {
+      const output = document.getElementById('outputText');
+      output.select();
+      document.execCommand('copy');
+    }
+  </script>
+</body>
+</html>
