@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Code Harvey</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      textarea, select, button {
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 16px;
+      }
+      #output {
+        background: #fff;
+        min-height: 150px;
+        margin-top: 10px;
+      }
+      #copy {
+        background-color: #0C29AB;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      #rewrite {
+        background-color: #0C29AB;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Harvey Rewrite Tool</h1>
+    <textarea id="input" placeholder="Paste up to 500 words here..."></textarea>
+    <select id="tone">
+      <option value="Standard">Standard</option>
+      <option value="Academic">Academic</option>
+      <option value="Professional">Professional</option>
+      <option value="Casual">Casual</option>
+    </select>
+    <button id="rewrite">Rewrite</button>
+    <textarea id="output" placeholder="Your rewritten version will appear here..." disabled></textarea>
+    <button id="copy">Copy</button>
+  </body>
+</html>
