@@ -75,23 +75,29 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+<div class="copy-container">
+  <button class="copy-button" onclick="copyOutput()">Copy</button>
+</div>
 
-    .copy-button {
-      position: absolute;
-      right: 0;
-      bottom: -38px;
-      padding: 6px 12px;
-      background-color: #0726c3;
-      color: white;
-      font-size: 13px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+  .copy-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
 
-    .copy-button:hover {
-      background-color: #04188a;
-    }
+.copy-button {
+  padding: 6px 12px;
+  background-color: #0726c3;
+  color: white;
+  font-size: 13px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  background-color: #04188a;
+}
   </style>
 </head>
 <body>
