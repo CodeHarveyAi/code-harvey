@@ -39,13 +39,13 @@
 <body>
   <h2>Harvey Rewrite Tool</h2>
 
-  <label for="toneSelector">Choose a tone:</label>
+  <textarea id="inputText" placeholder="Paste up to 500 words here..."></textarea>
+
+  <label for="toneSelector">Choose tone:</label>
   <select id="toneSelector">
     <option value="academic">Academic</option>
     <option value="casual">Casual</option>
   </select>
-
-  <textarea id="inputText" placeholder="Paste up to 500 words here..."></textarea>
 
   <button onclick="rewriteText()">Rewrite</button>
 
@@ -57,8 +57,6 @@
     async function rewriteText() {
       const inputText = document.getElementById('inputText').value;
       const tone = document.getElementById('toneSelector').value;
-
-      // Show loading message
       document.getElementById('outputText').value = 'Harvey is thinking...';
 
       try {
@@ -75,7 +73,7 @@
         if (data.rewrite) {
           document.getElementById('outputText').value = data.rewrite;
         } else {
-          document.getElementById('outputText').value = 'Error: Unable to rewrite text.';
+          document.getElementById('outputText').value = 'Error: Could not generate response.';
         }
       } catch (error) {
         console.error('Rewrite error:', error);
