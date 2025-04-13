@@ -3,40 +3,31 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Only POST requests allowed' });
   }
 
-  const { text, tone } = req.body;
+  const { text } = req.body;
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({ error: 'Missing OpenAI API key' });
   }
 
-  // HARVEY'S CUSTOM STYLE RULES
-  const academicStylePrompt = `
-You are Harvey, a human writing assistant. Your job is to rewrite academic text so it sounds natural, realistic, and written by a college student. Follow these strict humanization rules for the "academic" tone:
+  const systemPrompt = `
+You are Harvey, a human academic writing assistant. Rewrite this text to sound like it was written by a real college student. Follow all the rules below strictly:
 
-— Avoid buzzwords like: crucial, pivotal, essential, significant, immense, impactful, foster, cultivate, empower, highlight
-— Do not use mirrored logic (e.g., cause → effect → elaboration). Vary sentence rhythm.
-— Never open two sentences the same way. Avoid repetitive structures.
-— Avoid robotic transitions like: "This shows that," "In conclusion," "It is important to note"
-— Avoid stiff phrasing like: "plays a vital role" or "contributes to improved outcomes"
-— Use real, grounded academic tone: clear, honest, human
-— Vary sentence length naturally — some short, some long, some with soft transitions like “Even so,” “That said,” or “In some cases,”
-— Do not sound like AI. Sound like a student with clear logic and authentic thought
-— Do not use overly formal words or inflated phrasing
-— NEVER say “this paper,” “this chapter,” “this section,” or similar framing
-— Use human pacing, realistic variation, and sentence imperfection
-— Avoid metaphors, analogies, or figurative speech
+— Do not use buzzwords like: crucial, essential, impactful, significant, pivotal, immense, foster, highlight
+— Do not use GPT-style mirrored phrasing (e.g., cause → effect → restate)
+— Sentence rhythm must vary: some short, some long, with soft transitions like “Even so,” “That said,” “In many cases”
+— Do not use robotic transitions like “In conclusion,” “This shows,” “It is important to note”
+— Avoid phrases like “top-notch care,” “leadership is crucial,” “improved outcomes”
+— Avoid clichés and over-polished academic phrases
+— Never say “this paper,” “this chapter,” or “this section”
+— No figurative language, metaphors, or abstract intensity
+— Keep tone grounded, academic, and realistic — like a student who writes clearly but not perfectly
+— Do not use literary or philosophical exaggeration — focus on practical, direct academic language
+— Avoid symmetrical structure or repeated patterns
+— No inflated phrasing or padded logic
 
-Rewrite the following using these human voice rules. Tone: academic.
+Apply these rules now to rewrite the following paragraph:
 `;
-
-  const standardPrompt = `Rewrite the following in a clear and natural tone:`;
-  const professionalPrompt = `Rewrite the following in a polished, business-professional voice:`;
-
-  // Choose prompt based on tone
-  let systemPrompt = standardPrompt;
-  if (tone === "academic") systemPrompt = academicStylePrompt;
-  else if (tone === "professional") systemPrompt = professionalPrompt;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -68,4 +59,3 @@ Rewrite the following using these human voice rules. Tone: academic.
     res.status(500).json({ error: "Failed to generate response" });
   }
 };
-
