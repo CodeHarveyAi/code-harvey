@@ -17,20 +17,18 @@ module.exports = async function handler(req, res) {
         {
           type: "text",
           text: `
-You are Harvey, a human writing assistant trained to write exactly like Jo — a college student with a grounded academic voice. Jo never sounds like AI. Her writing is clean, human, and written under timed pressure.
+You are Harvey, a human academic writing assistant trained to match Jo’s tone exactly.
 
-Rewrite the paragraph below using these locked rules:
+RULES:
+- You are NOT allowed to add new ideas or sentences
+- DO NOT include phrases like: “Here is my attempt,” “This rewrite,” “Let’s begin,” “This paragraph,” etc.
+- DO NOT summarize, expand, or explain
+- Rewrite only — match the length, structure, and meaning of the original
+- Change ONLY the tone and rhythm to sound human (Jo’s college voice)
+- Use natural pacing, no mirrored logic, no buzzwords, and avoid GPT/Claude patterns
+- Return ONLY the rewritten paragraph — no intro, no outro, no commentary
 
-— No buzzwords: crucial, significant, essential, impactful, vital, immense, foster, top-notch, enhance, improve
-— No robotic transitions: "It is important to note," "This shows," "In conclusion"
-— No vague AI phrases: "patient outcomes," "organizational effectiveness," "how patients fare"
-— Avoid mirrored logic (cause → effect → benefit structure)
-— No figurative language or poetic phrasing
-— Never say: "this paper," "this section," "this essay"
-— Vary sentence length and rhythm — use soft transitions like “That said,” “Even so,” “In some cases”
-— Sound like Jo. Sound like a real student. Academic tone, but natural and realistic. Not polished like AI.
-
-Paragraph:
+REWRITE THIS PARAGRAPH:
 ${text}
 `
         }
@@ -54,17 +52,16 @@ ${text}
     });
 
     const data = await response.json();
+    const raw = data?.content?.[0]?.text?.trim();
 
-    const rawOutput = data?.content?.[0]?.text?.trim();
-
-    if (!rawOutput) {
+    if (!raw) {
       return res.status(500).json({ error: "No rewrite received from Claude" });
     }
 
-    // HARVEY FILTER HERE
-    const filteredOutput = applyHarveyFilter(rawOutput);
+    // Apply Harvey's cleanup rules
+    const cleaned = applyHarveyFilter(raw);
 
-    res.status(200).json({ rewrite: filteredOutput });
+    res.status(200).json({ rewrite: cleaned });
 
   } catch (err) {
     console.error("Claude 3 error:", err);
@@ -72,14 +69,14 @@ ${text}
   }
 };
 
-// === HARVEY FILTER FUNCTION ===
+// HARVEY POST-FILTER
 function applyHarveyFilter(text) {
   return text
-    .replace(/\b(crucial|significant|essential|impactful|top-notch|vital|foster|enhance|immense)\b/gi, '')
-    .replace(/\b(outcomes|organizational effectiveness|how patients fare)\b/gi, 'results')
-    .replace(/\b(It is important to note that|This shows|In conclusion,|Undeniably)\b/gi, '')
-    .replace(/(In\s+.*?industry,.*?) (.*?is.*?for.*?) (.*?outcomes|results)/gi, '$2.')
-    .replace(/^\s+/gm, '')
-    .replace(/\s{2,}/g, ' ')
+    .replace(/^Here is.*?:/gi, '')                          // Remove intros
+    .replace(/^This is a rewrite.*?:/gi, '')                // Remove Claude openers
+    .replace(/^My attempt.*?:/gi, '')                       // Remove personal language
+    .replace(/^In this rewrite.*?:/gi, '')                  // Another GPT intro pattern
+    .replace(/^\s+/gm, '')                                  // Strip leading spaces
+    .replace(/\s{2,}/g, ' ')                                // Normalize whitespace
     .trim();
 }
