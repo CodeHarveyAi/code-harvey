@@ -4,58 +4,56 @@ module.exports = async function handler(req, res) {
   }
 
   const { text } = req.body;
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'Missing OpenAI API key' });
+    return res.status(500).json({ error: 'Missing Claude API key' });
   }
 
-  const systemPrompt = `
-You are Harvey, a human academic writing assistant trained to write like a real college student. Your job is to rewrite text to sound grounded, readable, and realistic — not polished like AI.
+  const prompt = `
+Human: Rewrite the following paragraph using these locked tone rules:
 
-Follow these locked style rules exactly:
+— No buzzwords like: crucial, essential, significant, impactful, top-notch, immense, foster
+— Do not use vague AI phrases like: "organizational effectiveness", "improving outcomes", or "how patients fare"
+— Do not use mirrored logic or robotic structure (e.g., cause → effect → result)
+— Avoid transitions like: "It is important to note", "In conclusion", "This shows"
+— Never say: "this paper", "this section", "this chapter"
+— No metaphors, analogies, or figurative language
+— Use varied sentence length and realistic academic tone
+— Sound like a real student writing under timed conditions. Natural rhythm. Academic, but grounded.
 
-— Do NOT use buzzwords: crucial, essential, significant, impactful, immense, vital, top-notch, enhance, foster
-— Do NOT use vague AI phrases: "how patients fare," "organizational effectiveness," "leading to better outcomes," "improving results"
-— Do NOT use mirrored sentence logic (cause → effect → benefit). Vary flow.
-— NEVER say: "this paper," "this section," or "this chapter"
-— Avoid GPT-style symmetry, formal clichés, or inflated logic
-— Avoid robotic transitions: "It is important to note," "In conclusion," "This shows"
-— Avoid metaphors, analogies, or figurative speech
-— Vary sentence rhythm: some short, some long. Use soft transitions like “That said,” “Even so,” or “In some cases”
-— DO use: grounded phrasing, realistic pacing, human imperfection
-— Tone: Academic, but clear and natural. Sound like a thoughtful student under time pressure.
+Paragraph:
+${text}
 
-Rewrite the following paragraph using all of the above rules. You must sound human and undetectable as AI.
+Assistant:
 `;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.anthropic.com/v1/complete", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: text }
-        ],
-        temperature: 0.7
+        model: "claude-1.2",
+        max_tokens_to_sample: 800,
+        prompt: prompt,
+        stop_sequences: ["\n\nHuman:"]
       })
     });
 
     const data = await response.json();
 
-    if (!data.choices || !data.choices[0]) {
-      return res.status(500).json({ error: "No response from OpenAI" });
+    if (!data.completion) {
+      return res.status(500).json({ error: "No response from Claude" });
     }
 
-    res.status(200).json({ rewrite: data.choices[0].message.content.trim() });
+    res.status(200).json({ rewrite: data.completion.trim() });
 
   } catch (err) {
-    console.error("OpenAI error:", err);
-    res.status(500).json({ error: "Failed to generate response" });
+    console.error("Claude API error:", err);
+    res.status(500).json({ error: "Failed to generate response from Claude" });
   }
 };
