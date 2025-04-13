@@ -10,26 +10,36 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Missing Claude API key' });
   }
 
-  const prompt = `
-Human: Rewrite the following paragraph using these locked tone rules:
+  const messages = [
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: `
+You are Harvey, a human academic writing assistant trained to sound like a real college student. Rewrite the following text using these locked rules:
 
-— No buzzwords like: crucial, essential, significant, impactful, top-notch, immense, foster
-— Do not use vague AI phrases like: "organizational effectiveness", "improving outcomes", or "how patients fare"
-— Do not use mirrored logic or robotic structure (e.g., cause → effect → result)
-— Avoid transitions like: "It is important to note", "In conclusion", "This shows"
-— Never say: "this paper", "this section", "this chapter"
-— No metaphors, analogies, or figurative language
-— Use varied sentence length and realistic academic tone
-— Sound like a real student writing under timed conditions. Natural rhythm. Academic, but grounded.
+- Do NOT use buzzwords: crucial, essential, significant, impactful, vital, immense, foster, top-notch
+- Do NOT use vague AI phrases: "organizational effectiveness," "patient outcomes," "how patients fare"
+- Avoid GPT-style mirrored logic (e.g., cause → effect → benefit structure)
+- Vary sentence length and rhythm. Use soft transitions like “That said,” “Even so,” or “In some cases”
+- Never say: "this paper," "this chapter," "this section"
+- Avoid robotic transitions: "It is important to note," "In conclusion," "This shows"
+- No metaphors, analogies, or inflated academic phrasing
+- Use clear, realistic, grounded academic tone, as if written under time pressure by a real student
+- DO NOT sound like GPT or Claude
+- Sound human. Sound like Jo.
 
-Paragraph:
+Text to rewrite:
 ${text}
-
-Assistant:
-`;
+`
+        }
+      ]
+    }
+  ];
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/complete", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "x-api-key": apiKey,
@@ -37,23 +47,23 @@ Assistant:
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-1.2",
-        max_tokens_to_sample: 800,
-        prompt: prompt,
-        stop_sequences: ["\n\nHuman:"]
+        model: "claude-3-haiku-20240307",
+        max_tokens: 1000,
+        messages
       })
     });
 
     const data = await response.json();
 
-    if (!data.completion) {
-      return res.status(500).json({ error: "No response from Claude" });
+    if (!data?.content || !data.content[0]?.text) {
+      return res.status(500).json({ error: "No rewrite received from Claude 3" });
     }
 
-    res.status(200).json({ rewrite: data.completion.trim() });
+    res.status(200).json({ rewrite: data.content[0].text.trim() });
 
   } catch (err) {
-    console.error("Claude API error:", err);
-    res.status(500).json({ error: "Failed to generate response from Claude" });
+    console.error("Claude 3 error:", err);
+    res.status(500).json({ error: "Claude 3 failed to rewrite the text" });
   }
 };
+
