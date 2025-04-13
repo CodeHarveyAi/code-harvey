@@ -1,86 +1,70 @@
+const fetch = require('node-fetch');
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST requests allowed' });
   }
 
-  const { text } = req.body;
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const { text, tone } = req.body;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'Missing Claude API key' });
+    return res.status(500).json({ error: 'Missing OpenAI API key' });
   }
 
-  const referenceParagraph = `
-Leadership shapes how well organizations function and how people are treated. In a field where the stakes are high, clear direction helps build a culture that stays focused on patient care and safety. That said, leadership isn't the only factor. But it often makes a big difference, especially when things go wrong or need to improve.
+  // Locked style rules for both tones
+  const baseHarveyPrompt = `
+You are Harvey, a human academic writing assistant. Your job is to rewrite the user's text so it sounds like it was written by a real student — not AI. Follow these rules:
+- Vary sentence structure (short + long sentences).
+- Use soft transitions like “That said,” “Even so,” “For this reason” when needed.
+- Avoid robotic tone, mirrored cause-effect phrasing, and stiff logic.
+- Do NOT use buzzwords like: "crucial", "essential", "undeniable", "significant", "pivotal", "immense", "profound", "impactful", or "foster".
+- No literary devices (no metaphors, similes, or poetic phrasing).
+- Do not use AI-sounding transitions like: “In conclusion,” or “It is important to note.”
+- Rewrite in clear, grounded, realistic language that a college student would use under time pressure.
+
 `;
 
-  const messages = [
-    {
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: `
-You are Harvey, a human writing assistant trained to mimic the writing style of Jo — a college student with a clear, grounded academic voice.
+  const toneInstructions = {
+    academic: `Write in a formal academic tone. Sound like a real college student. Avoid all banned words. Paragraphs should be structured but human, with some imperfections. Do NOT say “this paper,” “this chapter,” or “will examine.”`,
+    casual: `Use a relaxed, informal tone like a journal or personal blog. Sentences can be conversational, emotional, or reflective. Keep the rhythm natural and human.`,
+  };
 
-MATCH THIS STYLE EXACTLY:
-${referenceParagraph}
-
-RULES:
-- Only rewrite the text provided
-- Do NOT add examples, conclusions, or summaries
-- Do NOT use buzzwords like: crucial, significant, vital, impactful, foster, enhance, pivotal, essential
-- Do NOT use vague phrases like: "outcomes," "organizational effectiveness," "those under care"
-- Do NOT use robotic transitions or corporate tone
-- Match the tone, rhythm, and pacing of the sample paragraph above
-- Write naturally, like a real student, not like an AI
-
-REWRITE THIS:
-${text}
-`
-        }
-      ]
-    }
-  ];
+  const fullPrompt = baseHarveyPrompt + toneInstructions[tone.toLowerCase()] + `\n\nRewrite the following in a ${tone} tone:\n`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 1000,
-        messages
-      })
+        model: "gpt-3.5-turbo",
+        temperature: 0.7,
+        messages: [
+          {
+            role: "system",
+            content: fullPrompt.trim(),
+          },
+          {
+            role: "user",
+            content: text,
+          },
+        ],
+      }),
     });
 
     const data = await response.json();
-    const raw = data?.content?.[0]?.text?.trim();
 
-    if (!raw) {
-      return res.status(500).json({ error: "No rewrite received from Claude" });
+    if (!data.choices || !data.choices[0]?.message?.content) {
+      return res.status(500).json({ error: "No response from OpenAI" });
     }
 
-    const cleaned = applyHarveyFilter(raw);
-
-    res.status(200).json({ rewrite: cleaned });
+    res.status(200).json({ rewrite: data.choices[0].message.content.trim() });
 
   } catch (err) {
-    console.error("Claude 3 error:", err);
-    res.status(500).json({ error: "Claude 3 failed to rewrite the text" });
+    console.error("OpenAI error:", err);
+    res.status(500).json({ error: "Failed to generate response" });
   }
 };
-
-function applyHarveyFilter(text) {
-  return text
-    .replace(/^Here is.*?:/gi, '')
-    .replace(/^My attempt.*?:/gi, '')
-    .replace(/^In this rewrite.*?:/gi, '')
-    .replace(/^\s+/gm, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
