@@ -6,7 +6,10 @@ export default async function handler(req, res) {
   const { text, tone } = req.body;
   const apiKey = process.env.OPENAI_API_KEY;
 
+  console.log("🟡 Incoming Request:", { text, tone });
+
   if (!apiKey) {
+    console.error("❌ Missing OpenAI API key");
     return res.status(500).json({ error: 'Missing OpenAI API key' });
   }
 
@@ -34,15 +37,17 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+    console.log("🟢 OpenAI API Response:", data);
 
     if (!data.choices || !data.choices[0]) {
+      console.error("⚠️ No choices returned from OpenAI");
       return res.status(500).json({ error: "No response from OpenAI" });
     }
 
     res.status(200).json({ rewrite: data.choices[0].message.content.trim() });
 
   } catch (err) {
-    console.error("OpenAI error:", err);
+    console.error("🔥 OpenAI error:", err);
     res.status(500).json({ error: "Failed to generate response" });
   }
 }
