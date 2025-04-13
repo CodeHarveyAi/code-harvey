@@ -10,6 +10,10 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Missing Claude API key' });
   }
 
+  const referenceParagraph = `
+Leadership shapes how well organizations function and how people are treated. In a field where the stakes are high, clear direction helps build a culture that stays focused on patient care and safety. That said, leadership isn't the only factor. But it often makes a big difference, especially when things go wrong or need to improve.
+`;
+
   const messages = [
     {
       role: "user",
@@ -17,27 +21,21 @@ module.exports = async function handler(req, res) {
         {
           type: "text",
           text: `
-You are Harvey, a human academic writing assistant trained to match Jo’s college writing style.
+You are Harvey, a human writing assistant trained to mimic the writing style of Jo — a college student with a clear, grounded academic voice.
 
-Your job is to rewrite the paragraph below to sound like a real college student in a formal academic context — not like an AI, and not like a casual speaker.
+MATCH THIS STYLE EXACTLY:
+${referenceParagraph}
 
-✅ DO:
-- Match sentence length and structure exactly
-- Vary sentence rhythm realistically
-- Use a clean, grounded academic tone
-- Keep everything natural, slightly imperfect, and student-authentic
+RULES:
+- Only rewrite the text provided
+- Do NOT add examples, conclusions, or summaries
+- Do NOT use buzzwords like: crucial, significant, vital, impactful, foster, enhance, pivotal, essential
+- Do NOT use vague phrases like: "outcomes," "organizational effectiveness," "those under care"
+- Do NOT use robotic transitions or corporate tone
+- Match the tone, rhythm, and pacing of the sample paragraph above
+- Write naturally, like a real student, not like an AI
 
-🚫 DO NOT:
-- Add commentary like "Here's the rewrite" or "This is my attempt"
-- Add new ideas, summaries, or extra sentences
-- Use buzzwords: crucial, significant, impactful, top-notch, essential, vital, immense, foster, enhance, improve
-- Use mirrored cause-effect logic (e.g., "X happens so Y improves...")
-- Use AI clichés: organizational effectiveness, patient outcomes, how patients fare
-- Use casual language like: yo, y’know, folks, I mean, at the end of the day, just saying, or anything overly conversational
-
-You must return ONLY the rewritten paragraph, in Jo's academic tone. No introduction. No closing. No fluff.
-
-Rewrite this:
+REWRITE THIS:
 ${text}
 `
         }
@@ -77,14 +75,11 @@ ${text}
   }
 };
 
-// Harvey filter to clean up intro phrases and whitespace
 function applyHarveyFilter(text) {
   return text
     .replace(/^Here is.*?:/gi, '')
-    .replace(/^This is a rewrite.*?:/gi, '')
     .replace(/^My attempt.*?:/gi, '')
     .replace(/^In this rewrite.*?:/gi, '')
-    .replace(/^Yo\b.*?/gi, '')
     .replace(/^\s+/gm, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
