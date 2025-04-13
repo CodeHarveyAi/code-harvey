@@ -15,14 +15,14 @@
     }
 
     h1 {
-      margin-bottom: 25px;
+      margin-bottom: 40px;
     }
 
     .controls {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 25px;
+      margin-bottom: 30px;
     }
 
     label {
@@ -60,6 +60,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
 
     .text-column h3 {
@@ -75,74 +76,6 @@
       resize: none;
     }
 
-    .copy-container {
-      width: 100%;
-      max-width: 1200px;
-      display: flex;
-      justify-content: flex-end;
-      padding-top: 8px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Harvey Rewrite Tool</h1>
-
-  <div class="controls">
-    <label for="toneSelector">Choose a tone style:</label>
-    <select id="toneSelector">
-      <option value="standard">Standard</option>
-      <option value="academic">Academic</option>
-      <option value="professional">Professional</option>
-    </select>
-    <button onclick="rewriteText()">Rewrite</button>
-  </div>
-
-  <div class="text-section">
-    <div class="text-column">
-      <h3>Original Text</h3>
-      <textarea id="inputText" placeholder="Paste up to 500 words here..."></textarea>
-    </div>
-    <div class="text-column">
-      <h3>Rewritten Text</h3>
-      <textarea id="outputText" readonly></textarea>
-    </div>
-  </div>
-
-  <div class="copy-container">
-    <button onclick="copyOutput()">Copy</button>
-  </div>
-
-  <script>
-    async function rewriteText() {
-      const inputText = document.getElementById('inputText').value.trim();
-      const tone = document.getElementById('toneSelector').value;
-
-      if (!inputText) {
-        document.getElementById('outputText').value = 'Please enter text to rewrite.';
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/harvey', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ text: inputText, tone: tone })
-        });
-
-        const result = await response.json();
-        document.getElementById('outputText').value = result.rewrite || 'Error: Could not generate response.';
-      } catch (err) {
-        document.getElementById('outputText').value = 'Error: Failed to connect to server.';
-      }
-    }
-
-    function copyOutput() {
-      const output = document.getElementById('outputText');
-      output.select();
-      document.execCommand('copy');
-    }
-  </script>
-</body>
-</html>
+    .copy-btn {
+      position: absolute;
+      bottom: 10px
