@@ -1,41 +1,28 @@
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST requests allowed' });
-  }
-
-  const { text } = req.body;
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({ error: 'Missing OpenAI API key' });
   }
 
-  // Break system prompt into chunks to avoid GPT filtering it out
-  const systemMessages = [
-    {
-      role: "system",
-      content: "You are Harvey, a human academic writing assistant. Your job is to rewrite student writing to sound human and natural, not like AI."
-    },
-    {
-      role: "system",
-      content: `
-Use this voice: academic, clear, realistic, and not overly polished. Follow these locked rules:
-- No buzzwords: crucial, significant, impactful, foster, etc.
-- No mirrored logic or robotic symmetry
-- Vary sentence length and rhythm
-- Never start two sentences the same
-- Avoid transitions like “In conclusion” or “It is important to note”
-- Do NOT use: this paper, this chapter, this section
-- Avoid AI phrasing like “improved outcomes” or “essential for success”
-- No metaphors or poetic language
-- Sound like a college student writing with clarity and intent
-`
-    },
-    {
-      role: "user",
-      content: text
-    }
-  ];
+  const testInput = `
+Leadership in healthcare is crucial for driving organizational effectiveness and enhancing patient outcomes. In the high-stakes healthcare industry, strong leadership is vital for fostering a culture that emphasizes quality care and patient safety, resulting in improved health outcomes.
+  `;
+
+  const systemPrompt = `
+You are Harvey, a human academic writing assistant. Rewrite the following text to sound like it was written by a real college student. Follow all of these rules exactly:
+
+- No buzzwords: crucial, significant, essential, impactful, immense, foster, vital, pivotal
+- Do not use mirrored phrasing like cause → effect → restate
+- Vary sentence rhythm: some short, some longer, with natural human pacing
+- Avoid robotic transitions: "In conclusion," "It is important to note," "This shows"
+- Do NOT use phrases like "this paper," "this chapter," or "this section"
+- No metaphors, poetic language, or over-polished structure
+- Avoid AI phrases like "improved outcomes," "organizational effectiveness," or "enhancing patient care"
+- Use soft transitions like “That said,” “Even so,” “In some cases”
+- Sound like a student — clear, realistic, direct
+- Tone: academic, but human and natural
+`;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -46,7 +33,10 @@ Use this voice: academic, clear, realistic, and not overly polished. Follow thes
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: systemMessages,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: testInput }
+        ],
         temperature: 0.7
       })
     });
