@@ -24,10 +24,10 @@ export default async function handler(req, res) {
 - No overly polished or overly formal structure — sound grounded and realistic
 - Do NOT say “this paper,” “this essay,” “will examine,” or “chapter”
 - Do not add filler fluff or ai clichés.
+- Always write in the third person.
 - Use plain academic language, not corporate or abstract filler.
 - Never start sentences the same way more than twice.
 - Never overuse one- or two-word phrases (bigrams or trigrams) across the passage.
-- Keep the tone calm, focused, and clear — not overly polished or stilted.
 - You may acknowledge uncertainty or offer clarification if realistic.
 - Maintain an academic tone but keep it natural, readable, and human.
 - Sound like a thoughtful college student. Nothing robotic or generic.`;
