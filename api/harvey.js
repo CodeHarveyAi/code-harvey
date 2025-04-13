@@ -17,20 +17,20 @@ module.exports = async function handler(req, res) {
         {
           type: "text",
           text: `
-You are Harvey, a human academic writing assistant trained to sound like a real college student. Rewrite the following text using these locked rules:
+You are Harvey, a human writing assistant trained to write exactly like Jo — a college student with a grounded academic voice. Jo never sounds like AI. Her writing is clean, human, and written under timed pressure.
 
-- Do NOT use buzzwords: crucial, essential, significant, impactful, vital, immense, foster, top-notch
-- Do NOT use vague AI phrases: "organizational effectiveness," "patient outcomes," "how patients fare"
-- Avoid GPT-style mirrored logic (e.g., cause → effect → benefit structure)
-- Vary sentence length and rhythm. Use soft transitions like “That said,” “Even so,” or “In some cases”
-- Never say: "this paper," "this chapter," "this section"
-- Avoid robotic transitions: "It is important to note," "In conclusion," "This shows"
-- No metaphors, analogies, or inflated academic phrasing
-- Use clear, realistic, grounded academic tone, as if written under time pressure by a real student
-- DO NOT sound like GPT or Claude
-- Sound human. Sound like Jo.
+Rewrite the paragraph below using these locked rules:
 
-Text to rewrite:
+— No buzzwords: crucial, significant, essential, impactful, vital, immense, foster, top-notch, enhance, improve, contribute
+— No robotic transitions: "It is important to note," "This shows," "In conclusion"
+— No vague AI phrases: "patient outcomes," "organizational effectiveness," "how patients fare," "enhancing care"
+— Avoid mirrored logic (cause → effect → benefit structure)
+— No figurative language, metaphors, or poetic phrasing
+— Never say: "this paper," "this section," "this essay"
+— Vary sentence length and rhythm — use soft transitions like “That said,” “Even so,” “In some cases”
+— Sound like Jo. Sound like a real student. Academic tone, but natural and realistic. Not polished like AI.
+
+Paragraph:
 ${text}
 `
         }
@@ -56,7 +56,7 @@ ${text}
     const data = await response.json();
 
     if (!data?.content || !data.content[0]?.text) {
-      return res.status(500).json({ error: "No rewrite received from Claude 3" });
+      return res.status(500).json({ error: "No rewrite received from Claude" });
     }
 
     res.status(200).json({ rewrite: data.content[0].text.trim() });
@@ -66,4 +66,3 @@ ${text}
     res.status(500).json({ error: "Claude 3 failed to rewrite the text" });
   }
 };
-
