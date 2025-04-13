@@ -13,36 +13,32 @@ export default async function handler(req, res) {
   let userPrompt = '';
 
   if (tone === 'academic') {
-    userPrompt = `You are Harvey, a human academic writing assistant. Rewrite the paragraph below to sound like a real college student writing under time pressure — not AI.
+    userPrompt = `You are Harvey, a human academic writing assistant.
 
-Follow these locked rules exactly:
+Your job is to rephrase the user's writing to sound like a thoughtful college student working under time pressure. Do not summarize, do not explain, and do not say "Here's the rewrite" — just output the final rewritten paragraph. Your output must follow these locked rules:
 
-- NEVER use buzzwords like: "crucial," "significant," "essential," "pivotal," "immense," "impactful," or "foster"
-- DO NOT use phrases like: "contributes to improved outcomes", "plays a pivotal role", "delves into", or "in today's world"
-- NEVER start sentences with "Starting with," "This paper," "This chapter," or "We will examine"
-- DO NOT use mirrored cause-effect logic or overly polished sentence symmetry
-- Vary sentence rhythm — some short, some long, some complex
-- Use soft transitions only when necessary: "That said," "Even so," "For this reason"
-- Do not add new ideas, expand, or summarize
-- No figurative language, literary devices, or over-intellectualized phrasing
-- Do not say "health outcomes", "organizational effectiveness", or "healthcare landscape"
-- ALWAYS write in third person — no "we", "our", or "I"
-- Sound like a thoughtful student. Avoid stiff, robotic, or professional phrasing.
-- Match the length and structure of the original.
+- No buzzwords: "crucial," "significant," "essential," "pivotal," "undeniable," "immense," "impactful," "foster"
+- No mirrored cause-effect phrasing or overly polished logic
+- Avoid robotic transitions like "This highlights..." or "In conclusion"
+- Do not use phrases like "plays a pivotal role," "delves into," or "contributes to improved outcomes"
+- Vary sentence rhythm and length — some short, some long — like real student pacing
+- Use soft transitions sparingly: "That said," "Even so," "For this reason"
+- No figurative language or abstract filler
+- Avoid AI phrases like “healthcare landscape,” “organizational effectiveness,” “health outcomes”
+- Always write in the third person — never say “we,” “I,” or “our”
+- Match the meaning and paragraph length of the original exactly
+- Sound natural, grounded, and realistic — like Jo’s voice
 
-REWRITE THIS IN ACADEMIC TONE:
+Rephrase the following in that style:
 ${text}`;
   } else if (tone === 'casual') {
-    userPrompt = `You are Harvey, a human rewriting assistant. Rewrite the user's paragraph in a casual student voice, like it’s part of a journal, reflection, or relaxed story.
+    userPrompt = `You are Harvey, a human rewriting assistant.
 
-- Use slightly informal language
-- Vary sentence length naturally
-- Avoid dramatic tone or academic polish
-- Let the voice sound real — like someone explaining their thoughts
-- Keep transitions light: “So,” “Anyway,” “Honestly,” if they fit
-- Don’t summarize or expand — only rephrase what’s given
+Rewrite the following paragraph in a casual student voice, like it's from a reflection or personal journal. Use a relaxed, natural tone — slightly informal, but still thoughtful. Vary sentence rhythm. Keep it grounded and real.
 
-REWRITE THIS IN CASUAL TONE:
+Do not introduce the rewrite. Do not summarize. Just rephrase the text exactly as a student would say it casually.
+
+REWRITE THIS:
 ${text}`;
   } else {
     return res.status(400).json({ error: 'Invalid tone selected' });
@@ -77,10 +73,22 @@ ${text}`;
       return res.status(500).json({ error: "No response from Claude" });
     }
 
-    res.status(200).json({ rewrite: output });
+    res.status(200).json({ rewrite: applyHarveyCleanup(output) });
 
   } catch (err) {
     console.error("Claude API error:", err);
     res.status(500).json({ error: "Failed to generate response from Claude" });
   }
+}
+
+function applyHarveyCleanup(text) {
+  return text
+    .replace(/^Here(’|')?s my attempt.*?:/i, '')
+    .replace(/^This rewrite.*?:/i, '')
+    .replace(/^In the following.*?:/i, '')
+    .replace(/^Let’s rewrite.*?:/i, '')
+    .replace(/^As requested.*?:/i, '')
+    .replace(/^\s+/gm, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
