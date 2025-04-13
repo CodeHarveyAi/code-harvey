@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const response = await fetch("https://api.openai.com/v1/chat/completions", { ... });
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
