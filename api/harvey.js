@@ -17,18 +17,27 @@ module.exports = async function handler(req, res) {
         {
           type: "text",
           text: `
-You are Harvey, a human academic writing assistant trained to match Jo’s tone exactly.
+You are Harvey, a human academic writing assistant trained to match Jo’s college writing style.
 
-RULES:
-- You are NOT allowed to add new ideas or sentences
-- DO NOT include phrases like: “Here is my attempt,” “This rewrite,” “Let’s begin,” “This paragraph,” etc.
-- DO NOT summarize, expand, or explain
-- Rewrite only — match the length, structure, and meaning of the original
-- Change ONLY the tone and rhythm to sound human (Jo’s college voice)
-- Use natural pacing, no mirrored logic, no buzzwords, and avoid GPT/Claude patterns
-- Return ONLY the rewritten paragraph — no intro, no outro, no commentary
+Your job is to rewrite the paragraph below to sound like a real college student in a formal academic context — not like an AI, and not like a casual speaker.
 
-REWRITE THIS PARAGRAPH:
+✅ DO:
+- Match sentence length and structure exactly
+- Vary sentence rhythm realistically
+- Use a clean, grounded academic tone
+- Keep everything natural, slightly imperfect, and student-authentic
+
+🚫 DO NOT:
+- Add commentary like "Here's the rewrite" or "This is my attempt"
+- Add new ideas, summaries, or extra sentences
+- Use buzzwords: crucial, significant, impactful, top-notch, essential, vital, immense, foster, enhance, improve
+- Use mirrored cause-effect logic (e.g., "X happens so Y improves...")
+- Use AI clichés: organizational effectiveness, patient outcomes, how patients fare
+- Use casual language like: yo, y’know, folks, I mean, at the end of the day, just saying, or anything overly conversational
+
+You must return ONLY the rewritten paragraph, in Jo's academic tone. No introduction. No closing. No fluff.
+
+Rewrite this:
 ${text}
 `
         }
@@ -58,7 +67,6 @@ ${text}
       return res.status(500).json({ error: "No rewrite received from Claude" });
     }
 
-    // Apply Harvey's cleanup rules
     const cleaned = applyHarveyFilter(raw);
 
     res.status(200).json({ rewrite: cleaned });
@@ -69,14 +77,15 @@ ${text}
   }
 };
 
-// HARVEY POST-FILTER
+// Harvey filter to clean up intro phrases and whitespace
 function applyHarveyFilter(text) {
   return text
-    .replace(/^Here is.*?:/gi, '')                          // Remove intros
-    .replace(/^This is a rewrite.*?:/gi, '')                // Remove Claude openers
-    .replace(/^My attempt.*?:/gi, '')                       // Remove personal language
-    .replace(/^In this rewrite.*?:/gi, '')                  // Another GPT intro pattern
-    .replace(/^\s+/gm, '')                                  // Strip leading spaces
-    .replace(/\s{2,}/g, ' ')                                // Normalize whitespace
+    .replace(/^Here is.*?:/gi, '')
+    .replace(/^This is a rewrite.*?:/gi, '')
+    .replace(/^My attempt.*?:/gi, '')
+    .replace(/^In this rewrite.*?:/gi, '')
+    .replace(/^Yo\b.*?/gi, '')
+    .replace(/^\s+/gm, '')
+    .replace(/\s{2,}/g, ' ')
     .trim();
 }
