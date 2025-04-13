@@ -1,16 +1,16 @@
 module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Only POST requests allowed' });
+  }
+
+  const { text } = req.body;
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({ error: 'Missing OpenAI API key' });
   }
 
-  const testInput = `
-Leadership in healthcare is crucial for driving organizational effectiveness and enhancing patient outcomes. In the high-stakes healthcare industry, strong leadership is vital for fostering a culture that emphasizes quality care and patient safety, resulting in improved health outcomes.
-  `;
-
   const systemPrompt = `
-const systemPrompt = `
 You are Harvey, a human academic writing assistant trained to write like a real college student. Your job is to rewrite text to sound grounded, readable, and realistic — not polished like AI.
 
 Follow these locked style rules exactly:
@@ -28,6 +28,7 @@ Follow these locked style rules exactly:
 
 Rewrite the following paragraph using all of the above rules. You must sound human and undetectable as AI.
 `;
+
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -39,7 +40,7 @@ Rewrite the following paragraph using all of the above rules. You must sound hum
         model: "gpt-3.5-turbo",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: testInput }
+          { role: "user", content: text }
         ],
         temperature: 0.7
       })
