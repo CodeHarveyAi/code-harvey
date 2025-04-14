@@ -27,17 +27,18 @@ export default async function handler(req, res) {
       const claudePrompt = `
 Rewrite the following paragraph so it sounds like it was written by a real college student under time pressure. Follow these rules strictly:
 
-1. Do NOT use any of these words: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate.
+1. NEVER use any of these words: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate.
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
 3. DO NOT add new ideas, commentary, or summaries. Do not reframe or elaborate. Only rewrite what's already present.
-4. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
-5. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
-6. Do NOT use em dashes — use commas or periods instead.
-7. Do NOT use metaphor, abstract intensity, or figurative phrasing.
-8. Vary sentence length: some short, some long, some in between.
-9. Keep the tone academic but realistic — like a student trying to write clearly under deadline.
-10. Always write in third person. Never use "I," "we," or "you."
-11. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
+4. Match the original number of sentences as closely as possible. Stay within the same word count range.
+5. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
+6. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
+7. Do NOT use em dashes — use commas or periods instead.
+8. Do NOT use metaphor, abstract intensity, or figurative phrasing.
+9. Vary sentence length: some short, some long, some compund, some complex, or am in between.
+10. Keep the tone academic but realistic — like a student trying to write clearly under deadline.
+11. Always write in third person. Never use "I," "we," or "you."
+12. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
 
 TEXT: ${text}`;
 
@@ -66,7 +67,7 @@ TEXT: ${text}`;
 
       if (containsBannedWords(rewrittenText)) {
         // fallback to GPT
-        const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content, commentary, or summary. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. TEXT: ${text}`;
+        const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content, commentary, or summary. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. Match sentence count and stay within original word range. TEXT: ${text}`;
 
         const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -100,7 +101,7 @@ TEXT: ${text}`;
       const chatPrompt = `You are Harvey, a human rewriting assistant. Rewrite the user’s text to sound like a real student writing casually — like a reflection, journal entry, or story. Follow these rules:
 
 - Use a natural, relaxed tone (not stiff or polished).
-- Include light transitions like “So,” “Anyway,” or “Honestly” if they fit.
+- Include light transitions like “Anyway,” or “Honestly” if they fit.
 - Never use dramatic or formal phrasing.
 - Vary sentence length and pacing.
 - Sound like someone thinking out loud — not like an essay.
