@@ -46,3 +46,9 @@ ${text}`.trim();
     });
   }
 }
+export async function GET() {
+  return new Response("Rewrite endpoint is live. Use POST with { text }.", {
+    status: 200,
+    headers: { "Content-Type": "text/plain" }
+  });
+}
