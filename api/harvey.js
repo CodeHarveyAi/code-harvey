@@ -1,6 +1,7 @@
-import { getAnthropicClient } from '@anthropic-ai/sdk';
+const { getAnthropicClient } = require('@anthropic-ai/sdk');
+const fetch = require('node-fetch');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Only POST requests allowed' });
   }
@@ -20,15 +21,16 @@ export default async function handler(req, res) {
     'interwoven', 'navigate', 'insight', 'dynamic', 'sheds light', 'lens'
   ];
 
-  const containsBannedWords = (text) => {
-    const lower = text.toLowerCase();
+  const containsBannedWords = (str) => {
+    const lower = str.toLowerCase();
     return bannedWords.some(word => lower.includes(word));
   };
 
   try {
     if (tone === 'academic') {
       const anthropic = getAnthropicClient(claudeKey);
-      const prompt = `
+
+      const claudePrompt = `
 Rewrite the following paragraph in an academic tone that sounds natural and human — like a real college student under time pressure. Follow these strict rules:
 
 1. DO NOT use these words: ${bannedWords.join(', ')}.
@@ -39,19 +41,24 @@ Rewrite the following paragraph in an academic tone that sounds natural and huma
 6. NEVER use phrases like “This paper,” “This section,” or “will examine.”
 7. DO NOT use em dashes. Use commas or periods instead.
 8. DO NOT use figurative language, poetic phrasing, or abstract intensity.
-9. Write in third person only — no “I,” “we,” or “you.”
+9. Write in third person only — never say “I,” “we,” or “you.”
 10. Keep it plain, grounded, clear, and readable for a college audience.
-11. Output ONLY the rewritten paragraph — no commentary or introductions.
+11. Output ONLY the rewritten paragraph — no commentary or explanation.
 
 TEXT:
 ${text}
-      `.trim();
+`.trim();
 
       const claudeResponse = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20240620",
+        model: 'claude-3-5-sonnet-20240620',
         max_tokens: 1500,
-        system: "You are a writing assistant that rewrites academic paragraphs to sound realistic, human, and deadline-written. Avoid all AI-sounding phrasing.",
-        messages: [{ role: "user", content: prompt }]
+        system: 'You are Harvey, a college writing assistant who rewrites academic text to sound realistic, human, and deadline-written. Avoid all AI-sounding phrasing.',
+        messages: [
+          {
+            role: 'user',
+            content: claudePrompt
+          }
+        ]
       });
 
       const claudeText = claudeResponse?.content?.[0]?.text?.trim();
@@ -61,7 +68,7 @@ ${text}
       }
 
       if (containsBannedWords(claudeText)) {
-        console.log('Fallback triggered due to banned words in Claude output.');
+        console.log('Fallback triggered due to banned words.');
         throw new Error('Claude used banned words — fallback to GPT.');
       }
 
@@ -73,4 +80,44 @@ ${text}
 You are Harvey, a human rewriting assistant. Rewrite the following text to sound like a real student writing casually — like a reflection, journal entry, or relaxed thought process.
 
 Rules:
-- No dramatic or stiff
+- No dramatic or stiff phrasing.
+- Use contractions and plain language.
+- Vary sentence length and rhythm.
+- No AI words like: ${bannedWords.join(', ')}.
+- Sound natural — like someone thinking out loud.
+
+TEXT:
+${text}
+`.trim();
+
+      const chatResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          temperature: 0.7,
+          messages: [
+            { role: 'user', content: casualPrompt }
+          ]
+        })
+      });
+
+      const chatData = await chatResponse.json();
+      const chatText = chatData?.choices?.[0]?.message?.content?.trim();
+
+      if (!chatText) {
+        return res.status(200).json({ rewrite: 'ChatGPT is on a coffee break... try again shortly!' });
+      }
+
+      return res.status(200).json({ rewrite: chatText });
+    }
+
+    return res.status(400).json({ error: 'Invalid tone selected' });
+  } catch (error) {
+    console.error('Harvey error:', error.message || error);
+    return res.status(500).json({ rewrite: 'Rewrite failed due to a server error.' });
+  }
+};
