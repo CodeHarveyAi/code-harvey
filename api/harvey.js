@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -29,7 +28,7 @@ export default async function handler(req, res) {
   }
 
   const claudePrompt = `
-You are Harvey, a human academic writing assistant. Rewrite the following paragraph to sound like a real college student under time pressure. Follow all instructions exactly:
+You are Harvey, a human academic writing assistant. Rewrite the following paragraph to sound like it was written by a real college student under time pressure. Follow all instructions exactly:
 
 1. DO NOT use these words: ${bannedWords.join(', ')}.
 2. DO NOT add new ideas, summaries, or conclusions. Rephrase only what's already in the original text.
@@ -53,23 +52,20 @@ ${input}`;
   try {
     const anthropic = new Anthropic({ apiKey: claudeKey });
 
-    const claudeResponse = await anthropic.messages.create({
-      model: "claude-3-sonnet-20240229",
+    const claudeRes = await anthropic.messages.create({
+      model: 'claude-3-sonnet-20240229',
       max_tokens: 1500,
-      system: "You are a helpful academic assistant who rewrites text clearly and naturally.",
-      messages: [{ role: "user", content: claudePrompt }]
+      system: 'You are a helpful academic assistant who rewrites text clearly and naturally.',
+      messages: [{ role: 'user', content: claudePrompt }]
     });
 
-    const rewritten = claudeResponse?.content?.[0]?.text?.trim();
+    const rewritten = claudeRes?.content?.[0]?.text?.trim();
 
     if (!rewritten || rewritten.startsWith('Here is')) {
       return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
     }
 
     if (containsBannedWords(rewritten)) {
-      // fallback to OpenAI GPT-4
-      const fallbackPrompt = `Rewrite the following paragraph in plain academic tone. Avoid all of the following words: ${bannedWords.join(', ')}. Do not summarize, add new content, or change meaning. Keep the sentence count similar. TEXT: ${input}`;
-
       const fallback = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -79,19 +75,24 @@ ${input}`;
         body: JSON.stringify({
           model: 'gpt-4',
           temperature: 0.5,
-          messages: [{ role: 'system', content: fallbackPrompt }]
+          messages: [
+            {
+              role: 'system',
+              content: `Rewrite the following in a plain academic tone. Avoid the following banned words: ${bannedWords.join(', ')}. TEXT: ${input}`
+            }
+          ]
         })
       });
 
-      const data = await fallback.json();
-      const gptRewritten = data?.choices?.[0]?.message?.content?.trim();
+      const fallbackData = await fallback.json();
+      const fallbackText = fallbackData?.choices?.[0]?.message?.content?.trim();
 
-      return res.status(200).json({ rewrite: gptRewritten || 'Fallback failed — try again later.' });
+      return res.status(200).json({ rewrite: fallbackText || 'Fallback failed — try again later.' });
     }
 
     return res.status(200).json({ rewrite: rewritten });
-  } catch (error) {
-    console.error('Harvey error:', error);
+  } catch (err) {
+    console.error('Harvey error:', err);
     return res.status(500).json({ error: 'Rewrite failed due to server error' });
   }
 }
