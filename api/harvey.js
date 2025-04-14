@@ -29,7 +29,7 @@ Rewrite the following paragraph so it sounds like it was written by a real colle
 
 1. NEVER use any of these words: crucial, essential, impactful, huighlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate, delve.
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
-3. DO NOT add new ideas, commentary, or summaries. Do not reframe or elaborate. Only rewrite what's already present.
+3. DO NOT add ideas, commentary, summaries or rephrased conclusions. Avoid framing the topic more broadly than the original text.
 4. Match the original number of sentences as closely as possible. Stay within the same word count range.
 5. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
 6. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
@@ -39,7 +39,7 @@ Rewrite the following paragraph so it sounds like it was written by a real colle
 10. Keep the tone academic but realistic — like a student trying to write clearly under deadline.
 11. Always write in third person. Never use "I," "we," or "you."
 12. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
-13. Keep the language and sentences clear and easy to follow — the rewrite should feel natural and readable, so any college-level reader can understand without struggling.
+13. Keep sentences straightforward and natural. Avoid academic buzz or abstract generalizations — aim for clarity, like how a thoughtful student would explain it to a classmate.
 
 TEXT: ${text}`;
 
