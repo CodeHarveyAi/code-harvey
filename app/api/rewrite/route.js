@@ -2,31 +2,41 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(req) {
-  try {
-    const { text } = await req.json()
+  const { text, tone } = await req.json()
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const prompt =
+    tone === 'academic'
+      ? `Rewrite this academic text in a formal, clear tone: ${text}`
+      : `Rewrite this in a natural, simple tone: ${text}`
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  const url = 'https://api.anthropic.com/v1/messages'
+
+  const headers = {
+    'x-api-key': apiKey,
+    'anthropic-version': '2023-06-01',
+    'content-type': 'application/json',
+  }
+
+  const body = {
+    model: 'claude-3-opus-20240229',
+    max_tokens: 1024,
+    temperature: 0.7,
+    messages: [{ role: 'user', content: prompt }],
+  }
+
+  try {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: 'Rewrite this academic text in a human tone without changing meaning:' },
-          { role: 'user', content: text },
-        ],
-        temperature: 0.7,
-      }),
+      headers,
+      body: JSON.stringify(body),
     })
 
-    const data = await res.json()
-
-    const rewritten = data.choices?.[0]?.message?.content || 'Rewrite failed.'
+    const json = await response.json()
+    const rewritten = json?.content?.[0]?.text || 'No rewrite returned.'
     return NextResponse.json({ rewritten })
-  } catch (err) {
-    console.error('Rewrite error:', err)
-    return NextResponse.json({ rewritten: 'Error occurred while rewriting.' })
+  } catch (error) {
+    console.error('Claude API error:', error)
+    return NextResponse.json({ rewritten: 'Error contacting Claude.' }, { status: 500 })
   }
 }

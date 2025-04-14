@@ -42,7 +42,8 @@ export default function Home() {
         body: JSON.stringify({ text, tone })
       })
       const data = await res.json()
-      setRewritten(data.rewritten.replace(/outcomes/gi, 'results'))
+      const replaced = data.rewritten?.replace(/outcomes/gi, 'results') || ''
+      setRewritten(replaced)
       setFeedback('')
       showToast('Rewritten!')
     } catch {
