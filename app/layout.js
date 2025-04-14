@@ -1,3 +1,4 @@
+import './globals.css';
 export const metadata = {
   title: 'Code Harvey',
   description: 'Rewrite academic content with Claude.',
