@@ -11,6 +11,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required inputs or API keys' });
   }
 
+  const bannedWords = [
+    'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
+    'pivotal', 'foster', 'enhance', 'critical', 'robust', 'transform',
+    'nuanced', 'interplay', 'illuminate'
+  ];
+
+  function containsBannedWords(text) {
+    const lowerText = text.toLowerCase();
+    return bannedWords.some(word => lowerText.includes(word));
+  }
+
   try {
     if (tone === 'academic') {
       const claudePrompt = `
@@ -52,6 +63,34 @@ TEXT: ${text}`;
         return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
       }
 
+      if (containsBannedWords(rewrittenText)) {
+        // fallback to GPT
+        const fallbackPrompt = `Rewrite this paragraph in academic tone like a real college student under time pressure. Keep it human, realistic, and avoid AI clichés or banned words. TEXT: ${text}`;
+        const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4',
+            temperature: 0.7,
+            messages: [
+              { role: 'system', content: fallbackPrompt }
+            ]
+          })
+        });
+
+        const fallbackData = await fallbackResponse.json();
+        const fallbackText = fallbackData?.choices?.[0]?.message?.content?.trim();
+
+        if (!fallbackText) {
+          return res.status(200).json({ rewrite: 'Fallback failed — try again in a moment.' });
+        }
+
+        return res.status(200).json({ rewrite: fallbackText });
+      }
+
       return res.status(200).json({ rewrite: rewrittenText });
     }
 
@@ -59,7 +98,7 @@ TEXT: ${text}`;
       const chatPrompt = `You are Harvey, a human rewriting assistant. Rewrite the user’s text to sound like a real student writing casually — like a reflection, journal entry, or story. Follow these rules:
 
 - Use a natural, relaxed tone (not stiff or polished).
-- Include light transitions like “So,” “Anyway,” or “Honestly” if they fit.
+- Include light transitions like “Anyway,” or “Honestly” if they fit.
 - Never use dramatic or formal phrasing.
 - Vary sentence length and pacing.
 - Sound like someone thinking out loud — not like an essay.
