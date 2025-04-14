@@ -13,81 +13,42 @@ export default async function handler(req, res) {
 
   try {
     if (tone === 'academic') {
-      const claudePrompt = `You are Harvey, a human academic writing assistant. Rewrite the user's text to sound like a thoughtful college student — not AI. You must follow these locked rules exactly:
+      const claudePrompt = `
+Rewrite the user's text to sound like a thoughtful college student writing under pressure. It should not sound like AI. Follow these locked rules exactly:
 
-- Never say "Here's a revision," "Rewritten version," or any form of commentary. Only return the rewritten paragraph. No explanations.
-- Never use: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster.
-- Do not start with: "This essay," "This paper," "This section," or "We will examine."
-- Never use em dashes (—). Use commas, semicolons, or parentheses instead.
-- Avoid mirrored or symmetrical sentence structure.
-- Vary sentence rhythm naturally: mix long, short, and compound sentences.
-- No robotic transitions like: "Moreover," "On the other hand," or "In conclusion."
-- Soft transitions like "Even so," "That said," or "For this reason" are okay if needed.
-- Use grounded, academic phrasing — no corporate tone or abstract filler.
-- Always write in third person unless original says otherwise.
-- Avoid repeating the same opening or key word more than twice.
-- Never add commentary, markdown formatting, lists, or bullet points.
-- Only return a single clean paragraph that reflects natural academic human writing.
-- Do not summarize or explain the revision. Just return the rewritten version — nothing more.
+1. NEVER use banned words: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, support, critical.
+2. NEVER use mirrored sentence structure (cause → effect → elaboration).
+3. NEVER start with: "This essay," "This paper," "This section," or "We will examine."
+4. NEVER use em dashes. Use commas, semicolons, or parentheses.
+5. NEVER use generic AI transitions like: Moreover, Therefore, In conclusion, etc.
+6. NEVER include lists, markdown, commentary, or explanations — ONLY return the final rewritten paragraph.
+7. NEVER repeat the same word or phrase more than twice.
+8. Vary sentence rhythm: mix short, long, compound, and complex naturally.
+9. Use grounded academic phrasing — NO corporate or abstract filler.
+10. Use third-person academic tone. No first-person or second-person unless in original.
 
-TEXT: ${text}`;
-
-      let rewrittenText = '';
-      try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': claudeKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'claude-3-5-haiku-20241022',
-            max_tokens: 1000,
-            messages: [
-              { role: 'user', content: claudePrompt }
-            ]
-          })
-        });
-
-        const data = await response.json();
-        rewrittenText = data?.content?.[0]?.text?.trim();
-      } catch (e) {
-        console.warn('Claude API failed:', e.message);
-      }
-
-      // Fallback to GPT-4 if Claude failed
-      if (!rewrittenText) {
-        const gptFallbackPrompt = `You are Harvey, a human academic writing assistant. Rewrite the user's text in academic student voice under time pressure. Rules:
-
-- Avoid: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster
-- No mirrored phrasing or AI-style transitions
-- Vary sentence length and rhythm
-- Avoid phrases like "this paper," "this section," or "delves into"
-- Never use em dashes — use commas or semicolons
-- Keep a grounded, human tone with light transitions if needed
-- Output only a clean paragraph — no commentary or explanations
+Return only ONE clean, natural academic paragraph. Nothing else.
 
 TEXT: ${text}`;
 
-        const fallbackRes = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'gpt-4',
-            temperature: 0.7,
-            messages: [
-              { role: 'system', content: gptFallbackPrompt }
-            ]
-          })
-        });
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': claudeKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-haiku-20241022',
+          max_tokens: 2000,
+          messages: [
+            { role: 'user', content: claudePrompt }
+          ]
+        })
+      });
 
-        const fallbackData = await fallbackRes.json();
-        rewrittenText = fallbackData?.choices?.[0]?.message?.content?.trim();
-      }
+      const data = await response.json();
+      const rewrittenText = data?.content?.[0]?.text?.trim();
 
       if (!rewrittenText) {
         return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
