@@ -13,8 +13,8 @@ export default async function handler(req, res) {
 
   const bannedWords = [
     'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
-    'pivotal', 'foster', 'enhance', 'critical', 'robust', 'transform',
-    'nuanced', 'interplay', 'illuminate'
+    'pivotal', 'foster', 'enhance', 'support', 'critical', 'robust', 'transform',
+    'nuanced', 'interplay', 'illuminate', 'framework', 'intricate'
   ];
 
   function containsBannedWords(text) {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       const claudePrompt = `
 Rewrite this paragraph so it sounds like it was written by a real college student — under pressure, in a realistic academic setting. Follow these strict rules:
 
-1. Do NOT use any of these words: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate.
+1. Do NOT use any of these words: crucial, essential, impactful, significant, immense, underscore, pivotal, foster, highlight, critical, robust, transform, nuanced, interplay, illuminate, framework, intricate.
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic openings.
 3. DO NOT use symmetrical sentence patterns like cause → effect → result.
 4. Avoid polished transitions like "Moreover," "Therefore," or "In conclusion."
@@ -98,7 +98,7 @@ TEXT: ${text}`;
       const chatPrompt = `You are Harvey, a human rewriting assistant. Rewrite the user’s text to sound like a real student writing casually — like a reflection, journal entry, or story. Follow these rules:
 
 - Use a natural, relaxed tone (not stiff or polished).
-- Include light transitions like “Anyway,” or “Honestly” if they fit.
+- Include light transitions like “So,” “Anyway,” or “Honestly” if they fit.
 - Never use dramatic or formal phrasing.
 - Vary sentence length and pacing.
 - Sound like someone thinking out loud — not like an essay.
@@ -141,3 +141,4 @@ TEXT: ${text}`;
     return res.status(500).json({ error: 'Rewrite failed due to server error' });
   }
 }
+
