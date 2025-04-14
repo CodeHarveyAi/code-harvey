@@ -32,24 +32,62 @@ export default async function handler(req, res) {
 
 TEXT: ${text}`;
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': claudeKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-haiku-20241022',
-          max_tokens: 1000,
-          messages: [
-            { role: 'user', content: claudePrompt }
-          ]
-        })
-      });
+      let rewrittenText = '';
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': claudeKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 1000,
+            messages: [
+              { role: 'user', content: claudePrompt }
+            ]
+          })
+        });
 
-      const data = await response.json();
-      const rewrittenText = data?.content?.[0]?.text?.trim();
+        const data = await response.json();
+        rewrittenText = data?.content?.[0]?.text?.trim();
+      } catch (e) {
+        console.warn('Claude API failed:', e.message);
+      }
+
+      // Fallback to GPT-4 if Claude failed
+      if (!rewrittenText) {
+        const gptFallbackPrompt = `You are Harvey, a human academic writing assistant. Rewrite the user's text in academic student voice under time pressure. Rules:
+
+- Avoid: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster
+- No mirrored phrasing or AI-style transitions
+- Vary sentence length and rhythm
+- Avoid phrases like "this paper," "this section," or "delves into"
+- Never use em dashes — use commas or semicolons
+- Keep a grounded, human tone with light transitions if needed
+- Output only a clean paragraph — no commentary or explanations
+
+TEXT: ${text}`;
+
+        const fallbackRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4',
+            temperature: 0.7,
+            messages: [
+              { role: 'system', content: gptFallbackPrompt }
+            ]
+          })
+        });
+
+        const fallbackData = await fallbackRes.json();
+        rewrittenText = fallbackData?.choices?.[0]?.message?.content?.trim();
+      }
 
       if (!rewrittenText) {
         return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
