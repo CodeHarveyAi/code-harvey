@@ -8,6 +8,7 @@ export default function Home() {
   const [toast, setToast] = useState('')
   const [warn, setWarn] = useState(false)
   const [feedback, setFeedback] = useState('')
+  const [tone, setTone] = useState('standard')
 
   const MAX_WORDS = 500
   const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
@@ -38,10 +39,10 @@ export default function Home() {
       const res = await fetch('/api/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, tone })
       })
       const data = await res.json()
-      setRewritten(data.rewritten)
+      setRewritten(data.rewritten.replace(/outcomes/gi, 'results'))
       setFeedback('')
       showToast('Rewritten!')
     } catch {
@@ -81,9 +82,34 @@ export default function Home() {
         </div>
       )}
 
-      <h1 className="text-4xl font-extrabold text-center text-indigo-700 mb-8">
+      <h1 className="text-4xl font-extrabold text-center text-indigo-700 mb-6">
         Code Harvey ✍️
       </h1>
+
+      <div className="flex justify-center gap-4 mb-4">
+        <label className="text-gray-600 font-medium">
+          <input
+            type="radio"
+            name="tone"
+            value="standard"
+            checked={tone === 'standard'}
+            onChange={(e) => setTone(e.target.value)}
+            className="mr-1"
+          />
+          Standard
+        </label>
+        <label className="text-gray-600 font-medium">
+          <input
+            type="radio"
+            name="tone"
+            value="academic"
+            checked={tone === 'academic'}
+            onChange={(e) => setTone(e.target.value)}
+            className="mr-1"
+          />
+          Academic
+        </label>
+      </div>
 
       <textarea
         ref={inputRef}
@@ -107,7 +133,7 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-center mt-6">
         <button
           onClick={handleRewrite}
           disabled={loading || overLimit}
@@ -130,7 +156,7 @@ export default function Home() {
         />
         <button
           onClick={handleCopy}
-          className="absolute top-2 right-2 px-3 py-1 text-sm text-white bg-indigo-500 hover:bg-indigo-600 rounded"
+          className="absolute bottom-2 right-2 px-3 py-1 text-sm text-white bg-indigo-500 hover:bg-indigo-600 rounded"
         >
           Copy
         </button>

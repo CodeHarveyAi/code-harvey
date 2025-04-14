@@ -1,55 +1,32 @@
+// app/api/rewrite/route.js
+import { NextResponse } from 'next/server'
+
 export async function POST(req) {
   try {
-    const { text } = await req.json();
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const { text } = await req.json()
 
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "Missing API key" }), { status: 500 });
-    }
-
-    const prompt = `
-Please rewrite the following academic text to sound naturally human-written.
-Avoid robotic structure, mirrored phrasing, and buzzwords. Keep the meaning unchanged.
-
-Text:
-${text}
-`.trim();
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 2000,
+        model: 'gpt-3.5-turbo',
         messages: [
-          { role: "user", content: prompt }
-        ]
-      })
-    });
+          { role: 'system', content: 'Rewrite this academic text in a human tone without changing meaning:' },
+          { role: 'user', content: text },
+        ],
+        temperature: 0.7,
+      }),
+    })
 
-    const result = await response.json();
-    const rewritten = result?.content?.[0]?.text?.trim() || "No output received.";
+    const data = await res.json()
 
-    return new Response(JSON.stringify({ rewritten }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
+    const rewritten = data.choices?.[0]?.message?.content || 'Rewrite failed.'
+    return NextResponse.json({ rewritten })
+  } catch (err) {
+    console.error('Rewrite error:', err)
+    return NextResponse.json({ rewritten: 'Error occurred while rewriting.' })
   }
-}
-
-// GET method to confirm deployment in browser
-export async function GET() {
-  return new Response("Rewrite endpoint is live. Use POST with JSON { text }.", {
-    status: 200
-  });
 }
