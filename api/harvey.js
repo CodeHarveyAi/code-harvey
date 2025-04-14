@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       const claudePrompt = `
 Rewrite the following paragraph so it sounds like it was written by a real college student under time pressure. Follow these rules strictly:
 
-1. NEVER use any of these words: crucial, essential, impactful, huighlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate.
+1. NEVER use any of these words: crucial, essential, impactful, huighlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate, delve.
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
 3. DO NOT add new ideas, commentary, or summaries. Do not reframe or elaborate. Only rewrite what's already present.
 4. Match the original number of sentences as closely as possible. Stay within the same word count range.
