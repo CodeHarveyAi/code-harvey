@@ -13,31 +13,31 @@ export default async function handler(req, res) {
 
   const bannedWords = [
     'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
-    'pivotal', 'foster', 'enhance', 'support', 'critical', 'robust', 'transform',
-    'nuanced', 'interplay', 'illuminate', 'framework', 'intricate',
-    'salient', 'forthcoming', 'commence', 'conducive'
+    'pivotal', 'foster', 'enhance', 'critical', 'robust', 'transform',
+    'nuanced', 'interplay', 'illuminate'
   ];
 
-  function findBannedWords(text) {
+  function containsBannedWords(text) {
     const lowerText = text.toLowerCase();
-    return bannedWords.filter(word => lowerText.includes(word));
+    return bannedWords.some(word => lowerText.includes(word));
   }
 
   try {
     if (tone === 'academic') {
       const claudePrompt = `
-Rewrite this paragraph so it sounds like it was written by a real college student — under pressure, in a realistic academic setting. Follow these strict rules:
+Rewrite the following paragraph so it sounds like it was written by a real college student under time pressure. Follow these rules strictly:
 
-1. Do NOT use any of these words: ${bannedWords.join(', ')}
-2. NEVER say "This paper," "This essay," or "This section." Avoid generic openings.
-3. DO NOT use symmetrical sentence patterns like cause → effect → result.
-4. Avoid polished transitions like "Moreover," "Therefore," or "In conclusion."
-5. NEVER use em dashes — replace with commas or periods.
-6. Do NOT use metaphor, analogy, or abstract intensity.
-7. Vary sentence length — mix short, medium, and long. Mimic human pacing.
-8. Use plain, grounded academic phrasing. Sound like a thoughtful but slightly rushed student.
-9. Write in third person only. No "I" or "we."
-10. Return ONLY the final rewritten paragraph. Do NOT explain or comment.
+1. Do NOT use any of these words: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate.
+2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
+3. DO NOT add new ideas or expand the content. Only rewrite what's there.
+4. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
+5. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
+6. Do NOT use em dashes — use commas or periods instead.
+7. Do NOT use metaphor, abstract intensity, or figurative phrasing.
+8. Vary sentence length: some short, some long, some in between.
+9. Keep the tone academic but realistic — like a student trying to write clearly under deadline.
+10. Always write in third person. Never use "I," "we," or "you."
+11. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
 
 TEXT: ${text}`;
 
@@ -59,15 +59,15 @@ TEXT: ${text}`;
 
       const data = await response.json();
       const rewrittenText = data?.content?.[0]?.text?.trim();
-      const claudeViolations = findBannedWords(rewrittenText || '');
 
       if (!rewrittenText || rewrittenText.startsWith('Here is')) {
-        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!', violations: claudeViolations });
+        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
       }
 
-      if (claudeViolations.length > 0) {
+      if (containsBannedWords(rewrittenText)) {
         // fallback to GPT
-        const fallbackPrompt = `Rewrite this paragraph in academic tone like a real college student under time pressure. Keep it human, realistic, and avoid AI clichés or banned words. TEXT: ${text}`;
+        const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content or change meaning. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. TEXT: ${text}`;
+
         const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -85,16 +85,15 @@ TEXT: ${text}`;
 
         const fallbackData = await fallbackResponse.json();
         const fallbackText = fallbackData?.choices?.[0]?.message?.content?.trim();
-        const gptViolations = findBannedWords(fallbackText || '');
 
         if (!fallbackText) {
-          return res.status(200).json({ rewrite: 'Fallback failed — try again in a moment.', violations: claudeViolations });
+          return res.status(200).json({ rewrite: 'Fallback failed — try again in a moment.' });
         }
 
-        return res.status(200).json({ rewrite: fallbackText, source: 'gpt-fallback', violations: gptViolations });
+        return res.status(200).json({ rewrite: fallbackText });
       }
 
-      return res.status(200).json({ rewrite: rewrittenText, source: 'claude', violations: claudeViolations });
+      return res.status(200).json({ rewrite: rewrittenText });
     }
 
     if (tone === 'casual') {
@@ -144,4 +143,3 @@ TEXT: ${text}`;
     return res.status(500).json({ error: 'Rewrite failed due to server error' });
   }
 }
-
