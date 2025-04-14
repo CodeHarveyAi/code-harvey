@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 export async function POST(req) {
   try {
     const { text } = await req.json();
@@ -11,11 +9,11 @@ export async function POST(req) {
 
     const prompt = `
 Please rewrite the following academic text to sound naturally human-written.
-Focus on varying sentence structure and rhythm. Avoid robotic patterns, mirrored phrasing, and generic transitions.
-Keep the original meaning intact. Do not add anything new. Do not explain your changes. Just return the rewritten version.
+Avoid robotic structure, mirrored phrasing, and buzzwords. Keep the meaning unchanged.
 
 Text:
-${text}`.trim();
+${text}
+`.trim();
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -34,11 +32,13 @@ ${text}`.trim();
     });
 
     const result = await response.json();
-    const rewritten = result.content?.[0]?.text?.trim() || "No rewrite returned.";
+    const rewritten = result?.content?.[0]?.text?.trim() || "No output received.";
+
     return new Response(JSON.stringify({ rewritten }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
+
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
@@ -46,9 +46,10 @@ ${text}`.trim();
     });
   }
 }
+
+// Optional: Handle GET so browser doesn’t 405
 export async function GET() {
-  return new Response("Rewrite endpoint is live. Use POST with { text }.", {
-    status: 200,
-    headers: { "Content-Type": "text/plain" }
+  return new Response("Rewrite endpoint is live. Use POST with JSON { text }.", {
+    status: 200
   });
 }
