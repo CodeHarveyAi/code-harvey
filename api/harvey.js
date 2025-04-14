@@ -26,25 +26,27 @@ export default async function handler(req, res) {
   try {
     if (tone === 'academic') {
       const claudePrompt = `
-Rewrite the following paragraph so it sounds like it was written by a real college student under time pressure. Follow these rules strictly:
+You are Harvey, a human academic writing assistant. Rewrite the following paragraph to sound like it was written by a real college student under time pressure. Follow all instructions exactly:
 
-1. NEVER use any of these words: crucial, essential, impactful, highlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate, delve, framework, interconnected, interwoven, navigate, insight, dynamic, sheds light, lens.
-2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
-3. DO NOT add new ideas, commentary, or summaries. Do not reframe or elaborate. Only rewrite what's already present.
-4. Match the original number of sentences as closely as possible. Stay within the same word count range.
-5. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
-6. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
-7. Do NOT use em dashes — use commas or periods instead.
-8. Do NOT use metaphor, abstract intensity, or figurative phrasing.
-9. Vary sentence length: some short, some long, some compound, some complex, or in between.
-10. Keep the tone academic but realistic — like a student trying to write clearly under deadline.
-11. Always write in third person. Never use "I," "we," or "you."
-12. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
-13. Keep the language and sentences clear and easy to follow — the rewrite should feel natural and readable, so any college-level reader can understand without struggling.
-14. Do not mention or imply any source, research, data, or studies unless it appeared in the original paragraph.
+1. DO NOT use these words: crucial, essential, impactful, highlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate, delve, framework, interconnected, interwoven, navigate, insight, dynamic, sheds light, lens.
+2. DO NOT add new ideas, summaries, or conclusions. Rephrase only what's already in the original text.
+3. Keep the meaning and number of sentences the same or as close as possible.
+4. Vary sentence length to sound natural — use short, medium, and long sentences.
+5. Avoid mirrored sentence structures like cause → effect → elaboration.
+6. Never use phrases like “This paper,” “This section,” or “will examine.”
+7. DO NOT use robotic transitions like “Moreover,” “Therefore,” or “In conclusion.”
+8. DO NOT use em dashes (—). Use commas or periods instead.
+9. DO NOT use figurative language or abstract intensity.
+10. Use clear, grounded phrasing — no buzzwords or corporate jargon.
+11. Always write in third person — never use “I,” “we,” or “you.”
+12. Make it sound readable and realistic — like a student trying to finish a paper on time.
+13. Do not mention scholars, data, studies, or research unless it appeared in the original.
+14. Keep it in a plain academic voice — easy to understand, no advanced academic tone.
+15. Output ONLY the rewritten paragraph — no commentary or explanation.
 
-TEXT: ${text}`;
-
+TEXT TO REWRITE:
+${text}
+`;
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -54,7 +56,7 @@ TEXT: ${text}`;
         },
         body: JSON.stringify({
           model: 'claude-3-sonnet-20240229',
-          max_tokens: 1000,
+          max_tokens: 1500,
           messages: [
             { role: 'user', content: claudePrompt }
           ]
@@ -79,7 +81,7 @@ TEXT: ${text}`;
           },
           body: JSON.stringify({
             model: 'gpt-4',
-            temperature: 0.7,
+            temperature: 0.5,
             messages: [
               { role: 'system', content: fallbackPrompt }
             ]
