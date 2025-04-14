@@ -14,12 +14,13 @@ export default async function handler(req, res) {
   const bannedWords = [
     'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
     'pivotal', 'foster', 'enhance', 'support', 'critical', 'robust', 'transform',
-    'nuanced', 'interplay', 'illuminate', 'framework', 'intricate'
+    'nuanced', 'interplay', 'illuminate', 'framework', 'intricate',
+    'salient', 'forthcoming', 'commence', 'conducive'
   ];
 
-  function containsBannedWords(text) {
+  function findBannedWords(text) {
     const lowerText = text.toLowerCase();
-    return bannedWords.some(word => lowerText.includes(word));
+    return bannedWords.filter(word => lowerText.includes(word));
   }
 
   try {
@@ -27,7 +28,7 @@ export default async function handler(req, res) {
       const claudePrompt = `
 Rewrite this paragraph so it sounds like it was written by a real college student — under pressure, in a realistic academic setting. Follow these strict rules:
 
-1. Do NOT use any of these words: crucial, essential, impactful, significant, immense, underscore, pivotal, foster, highlight, critical, robust, transform, nuanced, interplay, illuminate, framework, intricate.
+1. Do NOT use any of these words: ${bannedWords.join(', ')}
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic openings.
 3. DO NOT use symmetrical sentence patterns like cause → effect → result.
 4. Avoid polished transitions like "Moreover," "Therefore," or "In conclusion."
@@ -58,12 +59,13 @@ TEXT: ${text}`;
 
       const data = await response.json();
       const rewrittenText = data?.content?.[0]?.text?.trim();
+      const claudeViolations = findBannedWords(rewrittenText || '');
 
       if (!rewrittenText || rewrittenText.startsWith('Here is')) {
-        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
+        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!', violations: claudeViolations });
       }
 
-      if (containsBannedWords(rewrittenText)) {
+      if (claudeViolations.length > 0) {
         // fallback to GPT
         const fallbackPrompt = `Rewrite this paragraph in academic tone like a real college student under time pressure. Keep it human, realistic, and avoid AI clichés or banned words. TEXT: ${text}`;
         const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -83,15 +85,16 @@ TEXT: ${text}`;
 
         const fallbackData = await fallbackResponse.json();
         const fallbackText = fallbackData?.choices?.[0]?.message?.content?.trim();
+        const gptViolations = findBannedWords(fallbackText || '');
 
         if (!fallbackText) {
-          return res.status(200).json({ rewrite: 'Fallback failed — try again in a moment.' });
+          return res.status(200).json({ rewrite: 'Fallback failed — try again in a moment.', violations: claudeViolations });
         }
 
-        return res.status(200).json({ rewrite: fallbackText });
+        return res.status(200).json({ rewrite: fallbackText, source: 'gpt-fallback', violations: gptViolations });
       }
 
-      return res.status(200).json({ rewrite: rewrittenText });
+      return res.status(200).json({ rewrite: rewrittenText, source: 'claude', violations: claudeViolations });
     }
 
     if (tone === 'casual') {
