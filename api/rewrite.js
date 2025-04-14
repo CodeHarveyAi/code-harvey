@@ -1,4 +1,5 @@
-const { Anthropic } = require('@anthropic-ai/sdk');
+// pages/api/rewrite.js (Next.js)
+const fetch = require('node-fetch');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,57 +17,54 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const anthropic = new Anthropic({ apiKey });
-
-    const messagesPrompt = [
-      {
-        role: "user",
-        content: `
+    const prompt = `
 Please rewrite the following academic text to sound naturally human-written. 
 Focus on varying sentence structure and rhythm, removing any AI-detection patterns like mirrored phrasing or overused transitions. 
-Avoid robotic patterns, formal clichés, and buzzwords such as "crucial," "pivotal," or "delve." 
-Do not use em dashes. Vary sentence openers. Keep the meaning intact. Do not explain — just rewrite.
+Maintain the original meaning and tone, but make the writing more fluid and realistic, as if written by a college student. 
+Avoid robotic patterns, formal clichés, and buzzwords like "crucial," "pivotal," or "delve."
+Use no em dashes. Vary sentence openers. Prioritize natural rhythm and subtle variation. 
+Do not add extra ideas — just rewrite with clarity, flow, and human pacing. 
+No need to state what you're doing — just return the rewritten text.
 
-Text:
+Original Text:
 ${inputText}
-        `.trim()
-      }
-    ];
+    `.trim();
 
-    try {
-      const response = await anthropic.messages.create({
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
         model: "claude-3-haiku-20240307",
         max_tokens: 2000,
-        messages: messagesPrompt,
-      });
+        messages: [
+          { role: "user", content: prompt }
+        ]
+      })
+    });
 
-      return res.status(200).json({
-        rewritten: response.content?.[0]?.text?.trim() || "(No output from Claude)"
-      });
-    } catch (err) {
-      const fallbackPrompt = `
-Human: Rewrite the following academic text to sound naturally human-written. 
-Focus on varying sentence structure and rhythm. Remove mirrored phrasing and overused transitions. 
-Avoid robotic logic, formal clichés, and buzzwords like "crucial" or "pivotal." 
-Use no em dashes. Vary sentence openers. Keep the meaning the same. Don't explain — just rewrite.
-
-Text: ${inputText}
-
-Assistant:
-      `.trim();
-
-      const response = await anthropic.completions.create({
-        model: "claude-2.0",
-        prompt: `\n\n${fallbackPrompt}`,
-        max_tokens_to_sample: 2000,
-        stop_sequences: ["\n\nHuman:"],
-      });
-
-      return res.status(200).json({
-        rewritten: response.completion?.trim() || "(No output from fallback model)"
-      });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
     }
+
+    const data = await response.json();
+
+    if (!data.content || data.content.length === 0) {
+      throw new Error('Empty response from API');
+    }
+
+    return res.status(200).json({
+      rewritten: data.content[0].text.trim()
+    });
 
   } catch (error) {
     console.error('Rewrite error:', error);
-    return res.status(500
+    return res.status(500).json({
+      error: 'Failed to rewrite text: ' + error.message
+    });
+  }
+}
