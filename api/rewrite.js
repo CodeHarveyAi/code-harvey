@@ -1,7 +1,4 @@
-// pages/api/rewrite.js (Next.js)
-const fetch = require('node-fetch');
-
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -20,41 +17,37 @@ module.exports = async function handler(req, res) {
     const prompt = `
 Please rewrite the following academic text to sound naturally human-written. 
 Focus on varying sentence structure and rhythm, removing any AI-detection patterns like mirrored phrasing or overused transitions. 
-Maintain the original meaning and tone, but make the writing more fluid and realistic, as if written by a college student. 
-Avoid robotic patterns, formal clichés, and buzzwords like "crucial," "pivotal," or "delve."
-Use no em dashes. Vary sentence openers. Prioritize natural rhythm and subtle variation. 
-Do not add extra ideas — just rewrite with clarity, flow, and human pacing. 
-No need to state what you're doing — just return the rewritten text.
+Avoid robotic patterns, formal clichés, and buzzwords such as "crucial," "pivotal," or "delve." 
+Do not use em dashes. Vary sentence openers. Keep the meaning intact. Do not explain — just rewrite.
 
-Original Text:
+Text:
 ${inputText}
     `.trim();
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
         model: "claude-3-haiku-20240307",
         max_tokens: 2000,
-        messages: [
-          { role: "user", content: prompt }
-        ]
+        messages: [{ role: "user", content: prompt }]
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`API error: ${response.status} - ${JSON.stringify(errorData)}`);
+      console.error("Claude API Error:", errorData);
+      throw new Error(`Claude API error: ${response.status}`);
     }
 
     const data = await response.json();
 
     if (!data.content || data.content.length === 0) {
-      throw new Error('Empty response from API');
+      throw new Error("Claude returned an empty response");
     }
 
     return res.status(200).json({
@@ -62,9 +55,9 @@ ${inputText}
     });
 
   } catch (error) {
-    console.error('Rewrite error:', error);
+    console.error("Rewrite Error:", error.message);
     return res.status(500).json({
-      error: 'Failed to rewrite text: ' + error.message
+      error: "Rewrite failed: " + error.message
     });
   }
 }
