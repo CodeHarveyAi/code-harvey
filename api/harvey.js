@@ -1,5 +1,4 @@
-// Use ES Modules syntax
-import { Anthropic } from '@anthropic-ai/sdk';
+import Anthropic from '@anthropic-ai/sdk';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
   ];
 
   const claudePrompt = `
-You are Harvey, a human academic writing assistant. Rewrite the following paragraph to sound like a real college student under time pressure. Follow all instructions exactly:
+You are Harvey, a human academic writing assistant. Rewrite the following paragraph to sound like it was written by a real college student under time pressure. Follow all instructions exactly:
 
 1. DO NOT use these words: ${bannedWords.join(', ')}.
 2. DO NOT add new ideas, summaries, or conclusions. Rephrase only what's already in the original text.
@@ -50,9 +49,9 @@ ${input}`.trim();
     const anthropic = new Anthropic({ apiKey: claudeKey });
 
     const response = await anthropic.messages.create({
-      model: "claude-3-sonnet-20240229",
+      model: 'claude-3-sonnet-20240229',
       max_tokens: 1500,
-      messages: [{ role: "user", content: claudePrompt }]
+      messages: [{ role: 'user', content: claudePrompt }]
     });
 
     const rewritten = response?.content?.[0]?.text?.trim();
