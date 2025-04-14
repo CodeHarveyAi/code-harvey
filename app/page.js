@@ -1,183 +1,126 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+
+import { useState } from 'react'
 
 export default function Home() {
   const [text, setText] = useState('')
   const [rewritten, setRewritten] = useState('')
   const [loading, setLoading] = useState(false)
-  const [toast, setToast] = useState('')
-  const [warn, setWarn] = useState(false)
-  const [feedback, setFeedback] = useState('')
-  const [tone, setTone] = useState('standard')
+  const [tone, setTone] = useState('academic')
+  const [copied, setCopied] = useState(false)
+  const [wordCount, setWordCount] = useState(0)
 
-  const MAX_WORDS = 500
-  const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
-  const overLimit = wordCount > MAX_WORDS
-
-  const inputRef = useRef(null)
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = 'auto'
-      inputRef.current.style.height = inputRef.current.scrollHeight + 'px'
-    }
-  }, [text])
-
-  function showToast(message) {
-    setToast(message)
-    setTimeout(() => setToast(''), 2000)
+  const handleTextChange = (e) => {
+    const newText = e.target.value
+    setText(newText)
+    setWordCount(newText.trim().split(/\s+/).length)
   }
 
   async function handleRewrite() {
-    if (overLimit || loading) {
-      setWarn(true)
-      setTimeout(() => setWarn(false), 2000)
+    if (wordCount > 500) {
+      alert('Word limit exceeded (500 words max). Please shorten your text.')
       return
     }
+
     setLoading(true)
+    setCopied(false)
+
     try {
       const res = await fetch('/api/rewrite', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, tone })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text, tone }),
       })
       const data = await res.json()
-      const replaced = data.rewritten?.replace(/outcomes/gi, 'results') || ''
-      setRewritten(replaced)
-      setFeedback('')
-      showToast('Rewritten!')
-    } catch {
+      setRewritten(data.rewritten)
+    } catch (err) {
       setRewritten('Error occurred while rewriting.')
     } finally {
       setLoading(false)
     }
   }
 
-  function handleCopy() {
+  const handleCopy = () => {
     navigator.clipboard.writeText(rewritten)
-    showToast('Copied!')
+    setCopied(true)
   }
 
-  function handleClear() {
+  const handleClear = () => {
     setText('')
     setRewritten('')
-    setFeedback('')
-  }
-
-  function handleFeedback(value) {
-    setFeedback(value)
-    showToast(value === 'up' ? 'Thanks for the 👍' : 'Got it 👎')
+    setCopied(false)
+    setWordCount(0)
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-10 relative">
-      {toast && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300">
-          {toast}
-        </div>
-      )}
+    <main className="p-4 max-w-3xl mx-auto">
+      <h1 className="text-4xl font-bold mb-6 text-center text-indigo-700">Code Harvey ✍️</h1>
 
-      {warn && (
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300">
-          {overLimit ? 'Too many words!' : 'Harvey is thinking. Please wait...'}
-        </div>
-      )}
-
-      <h1 className="text-4xl font-extrabold text-center text-indigo-700 mb-6">
-        Code Harvey ✍️
-      </h1>
-
-      <div className="flex justify-center gap-4 mb-4">
-        <label className="text-gray-600 font-medium">
-          <input
-            type="radio"
-            name="tone"
-            value="standard"
-            checked={tone === 'standard'}
-            onChange={(e) => setTone(e.target.value)}
-            className="mr-1"
-          />
-          Standard
-        </label>
-        <label className="text-gray-600 font-medium">
-          <input
-            type="radio"
-            name="tone"
-            value="academic"
-            checked={tone === 'academic'}
-            onChange={(e) => setTone(e.target.value)}
-            className="mr-1"
-          />
-          Academic
-        </label>
+      <div className="mb-4">
+        <label htmlFor="tone" className="block font-medium mb-1">Select Tone:</label>
+        <select
+          id="tone"
+          value={tone}
+          onChange={(e) => setTone(e.target.value)}
+          className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        >
+          <option value="academic">Academic</option>
+          <option value="standard">Standard</option>
+        </select>
       </div>
 
       <textarea
-        ref={inputRef}
-        placeholder="Paste academic text here"
+        rows="6"
+        placeholder="Paste academic text here (max 500 words)"
         value={text}
-        onChange={(e) => setText(e.target.value)}
-        className={`w-full p-4 border rounded-lg shadow focus:outline-none resize-none focus:ring-2 ${
-          overLimit ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-indigo-400'
-        }`}
+        onChange={handleTextChange}
+        className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
       />
 
-      <div className="flex justify-between mt-2 text-sm">
-        <span className={overLimit ? 'text-red-500' : 'text-gray-500'}>
-          {wordCount} / {MAX_WORDS} words
-        </span>
+      <div className="flex items-center justify-between mt-2 text-sm text-gray-600">
+        <span>Word count: {wordCount}/500</span>
         <button
           onClick={handleClear}
-          className="text-red-500 hover:text-red-700 underline"
+          className="text-red-500 hover:text-red-700 font-medium"
         >
           Clear
         </button>
       </div>
 
-      <div className="flex justify-center mt-6">
+      <div className="mt-4 text-center">
         <button
           onClick={handleRewrite}
-          disabled={loading || overLimit}
-          className={`px-6 py-2 rounded text-white font-semibold ${
-            loading || overLimit ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+          disabled={loading}
+          className={`px-6 py-2 rounded text-white font-semibold transition ${
+            loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
           }`}
         >
-          {loading ? 'Rewriting...' : 'Rewrite'}
-        </button>
-      </div>
-
-      <h2 className="mt-10 text-2xl font-semibold text-gray-700">Rewritten:</h2>
-
-      <div className="relative mt-2">
-        <textarea
-          readOnly
-          value={rewritten}
-          rows="6"
-          className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-inner text-gray-800 resize-none"
-        />
-        <button
-          onClick={handleCopy}
-          className="absolute bottom-2 right-2 px-3 py-1 text-sm text-white bg-indigo-500 hover:bg-indigo-600 rounded"
-        >
-          Copy
+          {loading ? 'Thinking…' : 'Rewrite'}
         </button>
       </div>
 
       {rewritten && (
-        <div className="mt-4 flex gap-3 items-center">
-          <span className="text-sm text-gray-600">Was this helpful?</span>
-          <button
-            onClick={() => handleFeedback('up')}
-            className={`text-xl ${feedback === 'up' ? 'text-green-600' : 'text-gray-400 hover:text-green-500'}`}
-          >
-            👍
-          </button>
-          <button
-            onClick={() => handleFeedback('down')}
-            className={`text-xl ${feedback === 'down' ? 'text-red-600' : 'text-gray-400 hover:text-red-500'}`}
-          >
-            👎
-          </button>
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">Rewritten:</h2>
+          <textarea
+            value={rewritten}
+            readOnly
+            className="w-full h-48 p-4 border border-gray-300 rounded-lg shadow-sm resize-none"
+          />
+          <div className="flex items-center justify-between mt-2">
+            <button
+              onClick={handleCopy}
+              className="text-sm px-4 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+            >
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <div className="space-x-2">
+              <button className="text-green-600 hover:scale-110 transition">👍</button>
+              <button className="text-red-600 hover:scale-110 transition">👎</button>
+            </div>
+          </div>
         </div>
       )}
     </main>
