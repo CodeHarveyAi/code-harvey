@@ -29,7 +29,7 @@ Rewrite the following paragraph so it sounds like it was written by a real colle
 
 1. Do NOT use any of these words: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate.
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
-3. DO NOT add new ideas or expand the content. Only rewrite what's there.
+3. DO NOT add new ideas, commentary, or summaries. Do not reframe or elaborate. Only rewrite what's already present.
 4. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
 5. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
 6. Do NOT use em dashes — use commas or periods instead.
@@ -66,7 +66,7 @@ TEXT: ${text}`;
 
       if (containsBannedWords(rewrittenText)) {
         // fallback to GPT
-        const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content or change meaning. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. TEXT: ${text}`;
+        const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content, commentary, or summary. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. TEXT: ${text}`;
 
         const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
