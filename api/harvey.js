@@ -40,6 +40,7 @@ Rewrite the following paragraph so it sounds like it was written by a real colle
 11. Always write in third person. Never use "I," "we," or "you."
 12. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
 13. Keep sentences straightforward and natural. Avoid academic buzz or abstract generalizations — aim for clarity, like how a thoughtful student would explain it to a classmate.
+14. Do not invent framing sources like ‘research suggests’ unless they are present in the original paragraph.
 
 TEXT: ${text}`;
 
@@ -51,7 +52,7 @@ TEXT: ${text}`;
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-haiku-20241022',
+          model: 'claude-3-5-sonnet-20250219',
           max_tokens: 1000,
           messages: [
             { role: 'user', content: claudePrompt }
