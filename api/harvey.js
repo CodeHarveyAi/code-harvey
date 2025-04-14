@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
     'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
     'pivotal', 'foster', 'enhance', 'critical', 'robust', 'transform',
     'nuanced', 'interplay', 'illuminate', 'delve', 'framework', 'interconnected',
-    'interwoven', 'navigate', 'insight', 'dynamic', 'sheds light', 'lens'
+    'interwoven', 'navigate', 'insight', 'dynamic', 'sheds light', 'lens', 'highlight'
   ];
 
   function containsBannedWords(text) {
