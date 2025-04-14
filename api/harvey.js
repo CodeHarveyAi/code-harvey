@@ -14,7 +14,8 @@ export default async function handler(req, res) {
   const bannedWords = [
     'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
     'pivotal', 'foster', 'enhance', 'critical', 'robust', 'transform',
-    'nuanced', 'interplay', 'illuminate'
+    'nuanced', 'interplay', 'illuminate', 'delve', 'framework', 'interconnected',
+    'interwoven', 'navigate', 'insight', 'dynamic', 'sheds light', 'lens'
   ];
 
   function containsBannedWords(text) {
@@ -27,20 +28,20 @@ export default async function handler(req, res) {
       const claudePrompt = `
 Rewrite the following paragraph so it sounds like it was written by a real college student under time pressure. Follow these rules strictly:
 
-1. NEVER use any of these words: crucial, essential, impactful, huighlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate, delve.
+1. NEVER use any of these words: crucial, essential, impactful, highlight, immense, undeniable, pivotal, foster, support, critical, robust, transform, nuanced, interplay, illuminate, delve, framework, interconnected, interwoven, navigate, insight, dynamic, sheds light, lens.
 2. NEVER say "This paper," "This essay," or "This section." Avoid generic or academic framing.
-3. DO NOT add ideas, commentary, summaries or rephrased conclusions. Avoid framing the topic more broadly than the original text.
+3. DO NOT add new ideas, commentary, or summaries. Do not reframe or elaborate. Only rewrite what's already present.
 4. Match the original number of sentences as closely as possible. Stay within the same word count range.
 5. No mirrored sentence structures (avoid cause → effect → elaboration symmetry).
 6. Avoid transitions like "Moreover," "Therefore," or "In conclusion."
 7. Do NOT use em dashes — use commas or periods instead.
 8. Do NOT use metaphor, abstract intensity, or figurative phrasing.
-9. Vary sentence length: some short, some long, some compund, some complex, or am in between.
+9. Vary sentence length: some short, some long, some compound, some complex, or in between.
 10. Keep the tone academic but realistic — like a student trying to write clearly under deadline.
 11. Always write in third person. Never use "I," "we," or "you."
 12. Return ONLY the rewritten paragraph. Do NOT include commentary, explanations, or extra sentences.
-13. Keep sentences straightforward and natural. Avoid academic buzz or abstract generalizations — aim for clarity, like how a thoughtful student would explain it to a classmate.
-14. Do not invent framing sources like ‘research suggests’ unless they are present in the original paragraph.
+13. Keep the language and sentences clear and easy to follow — the rewrite should feel natural and readable, so any college-level reader can understand without struggling.
+14. Do not mention or imply any source, research, data, or studies unless it appeared in the original paragraph.
 
 TEXT: ${text}`;
 
@@ -52,7 +53,7 @@ TEXT: ${text}`;
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20250219',
+          model: 'claude-3-sonnet-20240229',
           max_tokens: 1000,
           messages: [
             { role: 'user', content: claudePrompt }
@@ -68,7 +69,6 @@ TEXT: ${text}`;
       }
 
       if (containsBannedWords(rewrittenText)) {
-        // fallback to GPT
         const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content, commentary, or summary. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. Match sentence count and stay within original word range. TEXT: ${text}`;
 
         const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
