@@ -4,7 +4,9 @@ export async function POST(req) {
   try {
     const { text } = await req.json();
     const apiKey = process.env.ANTHROPIC_API_KEY;
-
+    
+    console.log("API key loaded:", apiKey?.slice(0, 6), "(length:", apiKey?.length, ")");
+    
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: "API key not configured" }),
