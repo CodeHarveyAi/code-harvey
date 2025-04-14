@@ -1,148 +1,42 @@
-const { getAnthropicClient } = require('@anthropic-ai/sdk');
+const { Anthropic } = require('@anthropic-ai/sdk');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST requests allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { text, tone } = req.body;
-  const openAIKey = process.env.OPENAI_API_KEY;
-  const claudeKey = process.env.ANTHROPIC_API_KEY;
+  const { prompt } = req.body;
 
-  if (!text || !tone || !openAIKey || !claudeKey) {
-    return res.status(400).json({ error: 'Missing required inputs or API keys' });
-  }
-
-  const bannedWords = [
-    'crucial', 'essential', 'impactful', 'underscores', 'groundbreaking', 'empower',
-    'pivotal', 'foster', 'enhance', 'critical', 'robust', 'transform',
-    'nuanced', 'interplay', 'illuminate', 'delve', 'framework', 'interconnected',
-    'interwoven', 'navigate', 'insight', 'dynamic', 'sheds light', 'lens', 'highlight'
-  ];
-
-  function containsBannedWords(text) {
-    const lowerText = text.toLowerCase();
-    return bannedWords.some(word => lowerText.includes(word));
+  if (!prompt) {
+    return res.status(400).json({ error: 'Missing prompt text' });
   }
 
   try {
-    if (tone === 'academic') {
-      const anthropic = getAnthropicClient(claudeKey);
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
 
-      const claudePrompt = `
-You are Harvey, a human academic writing assistant. Rewrite the following paragraph to sound like it was written by a real college student under time pressure. Follow all instructions exactly:
-
-1. DO NOT use these words: ${bannedWords.join(', ')}.
-2. DO NOT add new ideas, summaries, or conclusions. Rephrase only what's already in the original text.
-3. Keep the meaning and number of sentences the same or as close as possible.
-4. Vary sentence length to sound natural — use short, medium, and long sentences.
-5. Avoid mirrored sentence structures like cause → effect → elaboration.
-6. Never use phrases like “This paper,” “This section,” or “will examine.”
-7. DO NOT use robotic transitions like “Moreover,” “Therefore,” or “In conclusion.”
-8. DO NOT use em dashes (—). Use commas or periods instead.
-9. DO NOT use figurative language or abstract intensity.
-10. Use clear, grounded phrasing — no buzzwords or corporate jargon.
-11. Always write in third person — never use “I,” “we,” or “you.”
-12. Make it sound readable and realistic — like a student trying to finish a paper on time.
-13. Do not mention scholars, data, studies, or research unless it appeared in the original.
-14. Keep it in a plain academic voice — easy to understand, no advanced academic tone.
-15. Output ONLY the rewritten paragraph — no commentary or explanation.
-
-TEXT TO REWRITE:
-${text}`;
-
-      const completion = await anthropic.messages.create({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 1500,
-        messages: [
-          {
-            role: 'user',
-            content: claudePrompt
-          }
-        ]
-      });
-
-      const rewritten = completion?.content?.[0]?.text?.trim();
-
-      if (!rewritten || rewritten.startsWith('Here is')) {
-        return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
-      }
-
-      if (containsBannedWords(rewritten)) {
-        const fallbackPrompt = `Rewrite the following paragraph using plain academic tone. Do not add new content, commentary, or summary. Avoid robotic phrasing and these banned words: ${bannedWords.join(", ")}. Match sentence count and stay within original word range. TEXT: ${text}`;
-
-        const fallbackResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'gpt-4',
-            temperature: 0.5,
-            messages: [
-              { role: 'system', content: fallbackPrompt }
-            ]
-          })
-        });
-
-        const fallbackData = await fallbackResponse.json();
-        const fallbackText = fallbackData?.choices?.[0]?.message?.content?.trim();
-
-        if (!fallbackText) {
-          return res.status(200).json({ rewrite: 'Fallback failed — try again in a moment.' });
-        }
-
-        return res.status(200).json({ rewrite: fallbackText });
-      }
-
-      return res.status(200).json({ rewrite: rewritten });
-    }
-
-    if (tone === 'casual') {
-      const chatPrompt = `You are Harvey, a human rewriting assistant. Rewrite the user’s text to sound like a real student writing casually — like a reflection, journal entry, or story. Follow these rules:
-
-- Use a natural, relaxed tone (not stiff or polished).
-- Include light transitions like “Anyway,” or “Honestly” if they fit.
-- Never use dramatic or formal phrasing.
-- Vary sentence length and pacing.
-- Sound like someone thinking out loud — not like an essay.
-- Do not add anything new — just rephrase exactly what was written.
-- Avoid literary devices, exaggeration, or perfect logic.
-- Never use buzzwords or abstract intensity (e.g., impactful, critical, fundamental).
-- Use contractions and simple language to reflect real student voice.
-- Preserve the original meaning and intent.
-
-TEXT: ${text}`;
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIKey}`,
-          'Content-Type': 'application/json'
+    const completion = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20240620',
+      max_tokens: 1000,
+      system: 'You are a human academic writing assistant. Rewrite text to sound natural, like a college student avoiding AI phrasing. No robotic logic, no buzzwords, no symmetry. Just clean, realistic academic writing.',
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
         },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          temperature: 0.7,
-          messages: [
-            { role: 'system', content: chatPrompt }
-          ]
-        })
-      });
+      ],
+    });
 
-      const data = await response.json();
-      const rewrittenText = data?.choices?.[0]?.message?.content?.trim();
+    const rewritten = completion?.content?.[0]?.text?.trim();
 
-      if (!rewrittenText) {
-        return res.status(200).json({ rewrite: 'ChatGPT is on a coffee break... try again shortly!' });
-      }
-
-      return res.status(200).json({ rewrite: rewrittenText });
+    if (!rewritten) {
+      return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
     }
 
-    return res.status(400).json({ error: 'Invalid tone selection' });
+    return res.status(200).json({ rewrite: rewritten });
   } catch (error) {
     console.error('Harvey error:', error);
-    return res.status(500).json({ error: 'Rewrite failed due to server error' });
+    return res.status(500).json({ error: 'Failed to rewrite text' });
   }
 };
