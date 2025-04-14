@@ -27,28 +27,91 @@ Rewrite the user's text to sound like a thoughtful college student writing under
 9. Use grounded academic phrasing — NO corporate or abstract filler.
 10. Use third-person academic tone. No first-person or second-person unless in original.
 
-Return only ONE clean, natural academic paragraph. Nothing else.
+Return only ONE clean, natural academic paragraph. Do not explain, summarize, or comment.
 
 TEXT: ${text}`;
 
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': claudeKey,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-haiku-20241022',
-          max_tokens: 2000,
-          messages: [
-            { role: 'user', content: claudePrompt }
-          ]
-        })
-      });
+      let rewrittenText = '';
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': claudeKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 2000,
+            messages: [
+              { role: 'user', content: claudePrompt }
+            ]
+          })
+        });
 
-      const data = await response.json();
-      const rewrittenText = data?.content?.[0]?.text?.trim();
+        const data = await response.json();
+        rewrittenText = data?.content?.[0]?.text?.trim();
+      } catch (e) {
+        console.warn('Claude API failed:', e.message);
+      }
+
+      if (!rewrittenText) {
+        // Retry Claude one time before fallback
+        try {
+          const retryResponse = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key': claudeKey,
+              'anthropic-version': '2023-06-01',
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-5-haiku-20241022',
+              max_tokens: 2000,
+              messages: [
+                { role: 'user', content: claudePrompt }
+              ]
+            })
+          });
+          const retryData = await retryResponse.json();
+          rewrittenText = retryData?.content?.[0]?.text?.trim();
+        } catch (retryErr) {
+          console.warn('Claude retry also failed:', retryErr.message);
+        }
+      }
+
+      // Fallback to GPT-4 if Claude still fails
+      if (!rewrittenText) {
+        const gptFallbackPrompt = `You are Harvey, a human academic writing assistant. Rewrite the user's text in academic student voice under time pressure. Rules:
+
+- Avoid: crucial, essential, impactful, significant, immense, undeniable, pivotal, foster, critical, illuminate, nuanced, framework, transform, 
+- No mirrored phrasing or AI-style transitions
+- Vary sentence length and rhythm
+- Avoid phrases like "this paper," "this section," or "delves into"
+- Never use em dashes — use commas or semicolons
+- Keep a grounded, human tone with light transitions if needed
+- Output only a clean paragraph — no commentary or explanations
+
+TEXT: ${text}`;
+
+        const fallbackRes = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4',
+            temperature: 0.7,
+            messages: [
+              { role: 'system', content: gptFallbackPrompt }
+            ]
+          })
+        });
+
+        const fallbackData = await fallbackRes.json();
+        rewrittenText = fallbackData?.choices?.[0]?.message?.content?.trim();
+      }
 
       if (!rewrittenText) {
         return res.status(200).json({ rewrite: 'Claude is thinking too hard... try again in a moment!' });
@@ -89,7 +152,27 @@ TEXT: ${text}`;
       });
 
       const data = await response.json();
-      const rewrittenText = data?.choices?.[0]?.message?.content?.trim();
+      let rewrittenText = data?.choices?.[0]?.message?.content?.trim();
+
+      if (!rewrittenText) {
+        // Fallback to gpt-3.5-turbo if GPT-4 fails
+        const gpt3Res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            temperature: 0.7,
+            messages: [
+              { role: 'system', content: chatPrompt }
+            ]
+          })
+        });
+        const gpt3Data = await gpt3Res.json();
+        rewrittenText = gpt3Data?.choices?.[0]?.message?.content?.trim();
+      }
 
       if (!rewrittenText) {
         return res.status(200).json({ rewrite: 'ChatGPT is on a coffee break... try again shortly!' });
