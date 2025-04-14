@@ -47,7 +47,7 @@ ${text}
   }
 }
 
-// Optional: Handle GET so browser doesn’t 405
+// GET method to confirm deployment in browser
 export async function GET() {
   return new Response("Rewrite endpoint is live. Use POST with JSON { text }.", {
     status: 200
