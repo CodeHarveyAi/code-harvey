@@ -1,27 +1,19 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const inputText = req.body.text;
-  if (!inputText) {
-    return res.status(400).json({ error: 'Missing text to rewrite' });
-  }
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'API key not configured' });
-  }
-
+export async function POST(req) {
   try {
+    const { text } = await req.json();
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: "Missing API key" }), { status: 500 });
+    }
+
     const prompt = `
 Please rewrite the following academic text to sound naturally human-written. 
-Focus on varying sentence structure and rhythm, removing any AI-detection patterns like mirrored phrasing or overused transitions. 
-Avoid robotic patterns, formal clichés, and buzzwords such as "crucial," "pivotal," or "delve." 
-Do not use em dashes. Vary sentence openers. Keep the meaning intact. Do not explain — just rewrite.
+Focus on varying sentence structure and rhythm. Avoid robotic patterns, mirrored phrasing, and generic transitions. 
+Keep the original meaning intact. Do not add anything new. Do not explain your changes. Just return the rewritten version.
 
 Text:
-${inputText}
+${text}
     `.trim();
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -34,30 +26,23 @@ ${inputText}
       body: JSON.stringify({
         model: "claude-3-haiku-20240307",
         max_tokens: 2000,
-        messages: [{ role: "user", content: prompt }]
+        messages: [
+          { role: "user", content: prompt }
+        ]
       })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Claude API Error:", errorData);
-      throw new Error(`Claude API error: ${response.status}`);
-    }
+    const result = await response.json();
 
-    const data = await response.json();
+    const rewrittenText = result?.content?.[0]?.text?.trim() || "No rewrite returned.";
 
-    if (!data.content || data.content.length === 0) {
-      throw new Error("Claude returned an empty response");
-    }
-
-    return res.status(200).json({
-      rewritten: data.content[0].text.trim()
+    return new Response(JSON.stringify({ rewritten: rewrittenText }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
     });
 
-  } catch (error) {
-    console.error("Rewrite Error:", error.message);
-    return res.status(500).json({
-      error: "Rewrite failed: " + error.message
-    });
+  } catch (err) {
+    console.error("Rewrite error:", err);
+    return new Response(JSON.stringify({ error: "Failed to rewrite text." }), { status: 500 });
   }
 }
