@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test OpenAI Rewrite</title>
+</head>
+<body>
+  <h1>OpenAI Rewriter Test</h1>
+  <textarea id="input" rows="8" cols="80" placeholder="Paste text here..."></textarea>
+  <br />
+  <select id="tone">
+    <option value="academic">Academic</option>
+    <option value="standard">Standard</option>
+  </select>
+  <br />
+  <button onclick="rewrite()">Rewrite</button>
+  <pre id="output" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 1em;"></pre>
+
+  <script>
+    async function rewrite() {
+      const text = document.getElementById('input').value;
+      const tone = document.getElementById('tone').value;
+
+      const response = await fetch('/api/rewrite/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, tone })
+      });
+
+      const data = await response.json();
+      document.getElementById('output').textContent = data.rewritten || 'No rewrite returned';
+    }
+  </script>
+</body>
+</html>

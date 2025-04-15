@@ -16,7 +16,19 @@ export default function Home() {
     setWordCount(newText.trim().split(/\s+/).length)
   }
 
-  async function handleRewrite() {
+  const handleClear = () => {
+    setText('')
+    setRewritten('')
+    setCopied(false)
+    setWordCount(0)
+  }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(rewritten)
+    setCopied(true)
+  }
+
+  const handleRewrite = async () => {
     if (wordCount > 500) {
       alert('Word limit exceeded (500 words max). Please shorten your text.')
       return
@@ -25,33 +37,25 @@ export default function Home() {
     setLoading(true)
     setCopied(false)
 
+    const endpoint = tone === 'academic' ? '/api/rewrite/claude' : '/api/rewrite/openai'
+
     try {
-      const res = await fetch('/api/rewrite', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ text, tone }),
       })
+
       const data = await res.json()
-      setRewritten(data.rewritten)
+      setRewritten(data.rewritten || 'No rewrite returned.')
     } catch (err) {
+      console.error('Rewrite error:', err)
       setRewritten('Error occurred while rewriting.')
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(rewritten)
-    setCopied(true)
-  }
-
-  const handleClear = () => {
-    setText('')
-    setRewritten('')
-    setCopied(false)
-    setWordCount(0)
   }
 
   return (
