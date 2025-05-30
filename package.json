@@ -2,15 +2,19 @@
   "name": "code-harvey",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "concurrently \"npm run next\" \"npm run ghost\" \"npm run lora\" \"npm run soul\"",
+    "next": "next dev -p 3000",
+    "ghost": "cd ghostwriter-api && uvicorn main:app --reload --port 8000",
+    "lora": "cd backend && uvicorn inference_lora:app --reload --port 8001",
+    "soul": "uvicorn soulrewrite_api:app --host 0.0.0.0 --port 8002 --reload",
+    "rewrite": "node scripts/runRewrite.js",
+    "test": "jest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "encoding": "^0.1.13",
-    "next": "13.4.10",
     "node-fetch": "^3.3.2",
     "openai": "^4.95.1",
     "react": "18.2.0",
@@ -21,7 +25,12 @@
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-react": "^7.26.3",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
+    "css-loader": "^7.1.2",
+    "jest": "^29.7.0",
+    "next": "^15.3.2",
     "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
     "tailwindcss": "^3.4.1"
   }
 }

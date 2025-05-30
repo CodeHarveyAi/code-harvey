@@ -1,66 +1,62 @@
-// ✅ File: /app/api/rewrite/phase6/phase6.js
-import { randomizeBySubject } from '@/lib/subjectcontrol.js';
-import { injectAcademicImperfection } from '@/lib/injectacademicimperfection.js';
+// ✅ Phase 6 - Controlled Chaos Rewrite (JoPattern + Reflection)
+import { getReflectionForEndingType } from '@/lib/reflectionbank.js';
+import { rewriteControlledChaos } from '@/lib/openaiutils.js';
 
-export async function runPhase6(input, body) {
-  if (!input || typeof input !== 'string' || input.trim() === '') {
+export async function runPhase6(input, metadata = {}) {
+  console.log('[Phase 6] 🌀 Starting Controlled Chaos Rewrite...');
+
+  if (!input || typeof input !== 'string') {
     console.warn('[Phase 6] ❌ Invalid input');
-    return '';
+    return input;
   }
 
-  // Skip sentences with transition markers
-  if (input.includes('[[TRANS:')) return input;
+  const subject = metadata.subject || 'general';
+  const selectedPattern = metadata.selectedPattern;
+  const endingType = metadata.endingType;
+  const reflection = metadata.reflection || getReflectionForEndingType(endingType);
+
+  if (!selectedPattern || !reflection) {
+    console.warn('[Phase 6] ❌ Missing pattern or reflection');
+    return input;
+  }
+
+  console.log('[Phase 6] 🎯 Pattern:', selectedPattern.id);
+  console.log('[Phase 6] 💬 Reflection:', reflection);
+
+  const chaosPrompt = `You are a human academic writer. Rewrite the following paragraph using the given sentence structure. Your rewrite must sound natural, intelligent, and grounded — like a real student organizing their thoughts.
+
+Guidelines:
+- Integrate the provided reflection somewhere in the paragraph
+- Follow the provided sentence structure pattern
+- Avoid first-person voice, em dashes, robotic logic, or AI-style phrasing
+- Keep the original meaning intact
+
+Structure Pattern: ${selectedPattern.structure}
+Reflection Phrase: ${reflection}
+
+Original:
+"""
+${input}
+"""`;
 
   try {
-   
-
-    const res = await fetch('http://localhost:8000/ghostwrite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: input, voice: 'jo_default' })
+    const output = await rewriteControlledChaos({
+      model: 'gpt-4o',
+      temperature: 0.5,
+      max_tokens: 600,
+      messages: [
+        {
+          role: 'system',
+          content: chaosPrompt
+        }
+      ]
     });
 
-    const json = await res.json();
+    console.log('[Phase 6] ✅ Final Output Ready');
+    return output.trim();
 
-    if (!json?.rewritten_text) {
-      throw new Error('No text returned from Ghostwriter');
-    }
-
-    let output = json.rewritten_text.trim();
-  
-
-    // 🔁 Use subject type from body (default to "generic")
-    const subjectType = (body?.subject || 'generic').toLowerCase();
-
-    // Inject imperfections based on subject
-    output = injectAcademicImperfection(subjectType, output);
-
-    // Apply JoPattern for variation
-    const joPatternRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'ft:gpt-3.5-turbo-0125:code-harvey:jopattern-v1:BTcEI2j7',
-        messages: [
-          { role: 'system', content: 'Apply one Jo rhythm pattern to humanize this paragraph. Make sure the meaning stays intact.' },
-          { role: 'user', content: output }
-        ],
-        temperature: 0.3
-      })
-    });
-    
-    const joPatternJson = await joPatternRes.json();
-    output = joPatternJson.choices?.[0]?.message?.content?.trim() || output;
-    
-    // Add subject-based variation layer
-    output = randomizeBySubject(output, subjectType);
-
-    return output;
   } catch (err) {
-    console.error('[Phase 6 ❌ Error]', err.message);
+    console.error('[Phase 6] ❌ Rewrite failed:', err);
     return input;
   }
 }

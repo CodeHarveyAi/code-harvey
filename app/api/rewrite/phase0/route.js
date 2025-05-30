@@ -1,7 +1,7 @@
 // /app/api/rewrite/phase0/route.js
 
 import { NextResponse } from 'next/server';
-import { runPhase0 } from './phase0.js'; // Your cleaned Phase 0
+import { runPhase0 } from './phase0.js';
 
 export const config = { runtime: 'nodejs' };
 
@@ -16,9 +16,14 @@ export async function POST(req) {
 
     console.log('[Phase 0] ✅ Input received:', input.length, 'chars');
 
-    const output = await runPhase0(input);
+    const result = await runPhase0(input);
+    const output = result.output;
 
-    return NextResponse.json({ rewrite: output }, { status: 200 });
+    return NextResponse.json({ 
+      rewrite: output,
+      metadata: result.metadata,
+      analysis: result.analysis 
+    }, { status: 200 });
 
   } catch (err) {
     console.error('[Phase 0 Error]', err.message);

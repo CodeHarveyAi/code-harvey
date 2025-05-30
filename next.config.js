@@ -1,10 +1,29 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  swcMinify: false, // disables SWC
-  compiler: {
-    // Force Babel for transpiling
-    styledComponents: true,
+  webpack: (config) => {
+    config.module.rules.forEach((rule) => {
+      if (Array.isArray(rule.oneOf)) {
+        rule.oneOf.forEach((one) => {
+          const useLoaders = Array.isArray(one.use) ? one.use : [one.use];
+          useLoaders.forEach((use) => {
+            if (
+              use &&
+              typeof use.loader === 'string' &&
+              use.loader.includes('css-loader')
+            ) {
+              use.options = {
+                ...use.options,
+                modules: {
+                  auto: true,
+                },
+              };
+            }
+          });
+        });
+      }
+    });
+    return config;
   },
-}
+};
 
-module.exports = nextConfig
+export default nextConfig;

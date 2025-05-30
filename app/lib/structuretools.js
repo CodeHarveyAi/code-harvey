@@ -4,6 +4,17 @@
 // -----------------------------------------------------------------------------
 // Part 1: Mirrored Phrase Removal
 // -----------------------------------------------------------------------------
+export function breakCompoundConclusions(text) {
+  if (!text || typeof text !== 'string') return text;
+
+  // Regex to find common "A and B are [C]" or "A, B, and C are D"
+  const pattern = /\b(\w+)\s+(and|or)\s+(\w+)\s+(are|help|support|lead to|improve|enhance)\s+([\w\s]+?)[\.\?]/gi;
+
+  return text.replace(pattern, (_, a, conj, b, verb, c) => {
+    // Break the cause-effect and mirror
+    return `${a} ${verb} ${c.trim()}. ${b.charAt(0).toUpperCase() + b.slice(1)} plays a role too, but in its own way.`;
+  });
+}
 
 export function detectSymmetry(_text) {
     return false; // Placeholder for future AI pattern detection
@@ -89,3 +100,71 @@ export function detectSymmetry(_text) {
   
     return output.trim();
   }
+  
+  export function forceSplitTriplets(text) {
+  if (!text || typeof text !== 'string') return text;
+
+  // Common GPT triplets we want to break
+  const tripletReplacements = [
+    {
+      pattern: /balance sheet, income statement, and cash flow statement/gi,
+      replacement: 'balance sheet and income statement. The cash flow statement is reviewed separately.'
+    },
+    {
+      pattern: /planning, organizing, and controlling/gi,
+      replacement: 'planning and organizing. Controlling is also considered separately.'
+    },
+    {
+      pattern: /ethics, empathy, and communication/gi,
+      replacement: 'ethics and empathy. Communication is addressed as its own component.'
+    }
+  ];
+
+  for (const { pattern, replacement } of tripletReplacements) {
+    text = text.replace(pattern, replacement);
+  }
+
+  return text;
+}
+
+export function breakRuleOfThree(text) {
+  return text.replace(/\b(\w+), (\w+), and (\w+)/gi, (_, a, b, c) => {
+    const rand = Math.random();
+    if (rand < 0.5) {
+      return `${a} and ${b}. ${c} is addressed separately.`;
+    } else {
+      return `${a} is examined first. Then, ${b} and ${c} follow.`;
+    }
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Part 3: Sentence Structure Randomizer
+// -----------------------------------------------------------------------------
+
+export function randomizeSentenceStructure(text) {
+  if (!text || typeof text !== 'string') return text;
+
+  const patterns = [
+    () => "The system works.",
+    () => "She reviews reports.",
+    () => "The room is quiet.",
+    () => "He responds quickly.",
+    () => "They gave the patient instructions.",
+  ];
+
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const randomized = [];
+
+  for (let sentence of sentences) {
+    const wordCount = sentence.split(/\s+/).length;
+    if (wordCount > 8 && Math.random() < 0.3) {
+      const structure = patterns[Math.floor(Math.random() * patterns.length)];
+      randomized.push(structure());
+    } else {
+      randomized.push(sentence);
+    }
+  }
+
+  return randomized.join(" ").replace(/\s{2,}/g, ' ').trim();
+}

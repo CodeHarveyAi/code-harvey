@@ -1,6 +1,5 @@
 // ✅ File: /app/lib/figurativefilter.js
-// Role: Replace metaphorical or figurative language
-// Used in: Phase 0–3, normalizeTone
+
 
 function toSafeString(input) {
   if (typeof input === 'string') return input;

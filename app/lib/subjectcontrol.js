@@ -9,25 +9,21 @@ export const subjectEntropyMap = {
     STEM: {
       sentenceOpeners: ['Technology', 'In practice', 'Systems can', 'A study found that'],
       connectorWords: ['however', 'in contrast', 'similarly', 'therefore'],
-      verbNounRatio: 0.9, // more technical verbs
       styleHints: ['use direct phrasing', 'insert statistical reference']
     },
     History: {
       sentenceOpeners: ['Historians argue', 'In the past', 'It is recorded that', 'During this period'],
       connectorWords: ['meanwhile', 'by comparison', 'subsequently'],
-      verbNounRatio: 0.6,
       styleHints: ['vary tense', 'use specific names/places', 'avoid symmetry']
     },
     Business: {
       sentenceOpeners: ['In recent years', 'Executives often', 'Strategy includes', 'The company reported'],
       connectorWords: ['thus', 'as a result', 'notably'],
-      verbNounRatio: 0.75,
       styleHints: ['remove generic claims', 'cut buzzwords', 'trim conclusions']
     },
     Healthcare: {
       sentenceOpeners: ['Clinicians often', 'Health data shows', 'Hospitals manage', 'Patients experience'],
       connectorWords: ['additionally', 'in response', 'this can lead to'],
-      verbNounRatio: 0.7,
       styleHints: ['soften conclusions', 'avoid absolutes', 'mix short/medium-length sentences']
     }
   };

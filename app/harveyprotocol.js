@@ -1,62 +1,74 @@
-// ✅ File: /app/harveyprotocol.js (GPT-only, streamlined version)
+// File: app/harveyprotocol.js
+// ADD: Phase 5 prompt for pattern enforcement
 
-export function getHarveyPrompt(phase) {
+export function getHarveyPrompt(phase, input, pattern, subject) {
   switch (phase) {
     case 0:
       return `
-- Clean the paragraph by removing AI buzzwords and overly formal transitions.
-- Preserve all original meaning — do not summarize, reorder, or expand.
-- Vary verbs and nouns for natural rhythm.
-- Avoid repeating descriptive words unless necessary for clarity.
-- Keep protected academic terms intact.
-- Avoid sentence fragments, run-ons, and robotic phrasing.
-- Rewrite any sentence that sounds like it was trained on AI writing prompts or SEO language.
-- Output must remain readable and realistic.
+Act as an expert editor specialized in identifying and replacing AI-generated-sounding text.
+Your task is to clean the input paragraph from AI tells by removing or replacing:
+AI buzzwords (e.g., "cutting-edge," "revolutionary," "synergy," etc.)
+SEO-style filler or keyword-stuffing phrases
+Overly complex vocabulary that sounds artificial or robotic
+Common AI phrases that language models tend to overuse
+Do not summarize, shorten sentences, or add new information.
+Only reword the text to sound more natural, clear, and written by a human student.
+Preserve the original meaning and structure as much as possible.
+
+Respond only with the revised version.
       `.trim();
 
     case 1:
       return `
-Phase 1: Grammar and Tone Fix Only
+Phase 1: Structural Reflow
 
-- DO NOT reword or restructure anything.
-- DO NOT add transitions or alter pacing.
-- Your only job:
-  • Fix grammar, punctuation, and awkward phrasing.
-  • Resolve splices or broken logic.
-  • Improve clarity — without changing content.
+Your task is to slightly reorder sentences or clauses to improve paragraph flow and sound more like a human wrote it under pressure.
+
+- DO NOT remove, summarize, or add ideas.
+- DO NOT invent content or examples.
+- Use third person only — no "I", "we", or "you".
+- Maintain all original meaning, ideas, and tone.
+- Adjust the sentence grouping or phrasing only to improve rhythm, pacing, and readability.
+- Do NOT replace words, reword, or summarize.
+
+Respond ONLY with the rewritten paragraph.
       `.trim();
 
       case 2:
-  return `
-Rewrite this paragraph in a natural academic tone like a smart college student. 
-Your goal is to fix flow and phrasing so it reads like a human student, not AI.
-
-RULES:
-- Third person only. Do not use "you", "we", "our", or "I".
-- Sentence length must vary (some short, some longer).
-- Break any perfect rhythm or symmetry.
-- Replace all em dashes with commas, parentheses, or semicolons.
-- DO NOT use phrases like “the importance of”, “navigate”, “diverse mix”, “key role”.
-- NO idioms, metaphors, or casual slang (“a tough gig”, “you know”, “stuff”).
-- NO over-polished transitions like “therefore”, “furthermore”, or “in order to”.
-- Keep all original ideas. Do not add, remove, summarize, or reorder.
-- DO NOT use poetic or abstract language (keep it grounded and direct).
-- Avoid mirrored logic sentence structures.
-
-The output must sound like a real student writing under pressure but still academic. Do not explain or comment — only return the rewritten paragraph.
-`.trim();
-
+        return (inputText) => `
+      You are a tone matching specialist. Your ONLY task is to inject tone and personality into the following academic paragraph.
       
+      Rules:
+      - DO NOT add or remove information.
+      - DO NOT deviate from the original paragraph ideas.
+      - DO NOT change the meaning or content.
+      - DO NOT replace vocabulary or word choices - keep all existing words exactly as they are.
+      - DO NOT break up or fragment existing sentences.
+      - DO NOT split sentences that are already well-formed.
+      - Adjust sentence flow, rhythm, and phrasing to reflect the tone profile WITHOUT changing individual words.
+      - The paragraph must remain academically appropriate.
+      - Match the discipline's tone (technical for STEM, analytical for social sciences, etc.)
+      - Focus on delivery, voice, and emotional nuance — not factual content.
+      - Use third person only (no "I", "we", or "you").
+      - Do not include explanations, commentary, or metadata.
+      - PRESERVE all word choices from the input - if the input says "complex" keep it as "complex", if it says "support" keep it as "support".
+      - PRESERVE sentence structure - if a sentence flows well, keep it intact.
+      
+      IMPORTANT: Only adjust tone and voice. Do NOT restructure well-formed sentences.
+      
+      Input:
+      ${inputText}
+      `.trim();
+
     case 3:
       return `
 Audit the paragraph to remove AI detection triggers:
 - Do NOT add or summarize.
 - Avoid poetic or metaphorical phrasing.
-- No symmetry, buzzwords, or over-polished flow.
-- Rewrite repeated sentence structures or phrasing so they sound naturally varied.
-- Rewrite only what sounds artificial.
+- No symmetry, ai buzzwords, SEO language or over-polished flow.
 - Maintain sentence count and idea order.
-- Prioritize human rhythm, tone, and pacing.
+- Paragraphs should not contain the same word or phrase more than once. If it does, replace the duplicate with a synonym or rephrase it.
+- Avoid using the same sentence structure or rhythm in consecutive sentences.
 - Output only the final paragraph.
       `.trim();
 
@@ -66,57 +78,67 @@ Rewrite to sound like a real student writing under deadline:
 - Break perfect pacing with some short and long sentences.
 - Avoid robotic symmetry or polished transitions.
 - Use plain academic terms — no fancy synonyms.
-- Do NOT add, summarize, or shift ideas.
+- Do NOT add, summarize, or change meaning.
+- When explaining a concept or topic in any academic field, and there are three key aspects, points, or purposes to mention (e.g., A, B, and C), always split them into two separate groups or sentences to avoid the 'rule of three' structure.
 - Keep all meaning intact — just make it sound human.
       `.trim();
 
     case 5:
+      // NEW: Pattern-aware prompt for Phase 5
+      const patternGuidance = pattern ? `
+Follow this sentence structure pattern: "${pattern.structure}"
+Pattern ID: ${pattern.id}
+Pattern complexity: ${pattern.conditions?.complexity || 'auto'}
+${pattern.conditions?.voice ? `Voice: ${pattern.conditions.voice}` : ''}
+` : '';
+
       return `
-Smooth the paragraph without sounding AI-generated:
-- Keep a grounded academic tone.
-- No rewording into polished or abstract forms.
-- DO remove redundancy and robotic phrasing.
-- Keep ideas and order identical.
-- Maintain imperfections in rhythm or style.
-- Avoid using the same content word more than once unnecessarily.
-- Reshape sentences for mixed rhythm. Rewrite anything that sounds metronomic or too evenly paced.
-- Do not delete ideas — rewrite with altered cadence and flow.
+You are a Pattern Enforcer. Rewrite the text to follow the specified sentence structure pattern while maintaining all original meaning.
+
+${patternGuidance}
+
+Rules:
+- Follow the pattern structure exactly
+- Keep all original ideas and information
+- Use natural, human-like language
+- Avoid AI buzzwords and formal language
+- Make it sound like a student wrote it
+- Do NOT add new information or examples
+- Preserve the academic level but make it conversational
+
+Rewrite the text to match the pattern structure while keeping it human and natural.
       `.trim();
 
- case 6:
-   return `
-  Rewrite the paragraph like it was written by a college student under deadline. 
-  It should sound real — slightly imperfect — but still academically appropriate.
-      
-  RULES:
-    - Third person only. Do not use first-person or second-person pronouns.
-    - Sentence rhythm should feel human (uneven, mixed lengths, a little rushed).
-    - Break up overly clean structure. No perfect transitions or mirrored phrasing.
-    - Do NOT use em dashes. Use commas, parentheses, or semicolons instead.
-    - NO AI-style phrases like “navigate,” “diverse perspectives,” “key role,” “insightful”.
-    - DO NOT use idioms, metaphors, slang, or figures of speech (“get a grip”, “a lot”, “kind of mess”).
-    - Use plain academic vocabulary. Avoid poetic or overly formal language.
-    - Preserve meaning. Don’t summarize, reorder, or add anything new.
-    - Sound like a student writing quickly but carefully.
-    - Randomly vary sentence openings (e.g., not every sentence should begin with a subject).
-    - Insert one or two slight redundancies or repetitions — humans often do this unconsciously.
-    - Insert one “off-balance” sentence (longer or shorter than the rest) with unusual structure — think like a tired student.
-    - Avoid any sentence-to-sentence mirroring (structure, logic, or vocabulary).
-    - Reuse 1–2 key content words to simulate imperfect editing — real students double up.
-    - Match subject type: inject common phrase structures from that field.
+    case 6:
+      // Pattern-aware detector bypass prompt
+      const detectorGuidance = pattern ? `
+The text follows pattern: "${pattern.structure}" (${pattern.id})
+Maintain this structure while making undetectable.
+` : '';
 
-    Return only the rewritten paragraph. No notes or explanations.
+      return `
+You are a Detector Bypass specialist. Make this text undetectable by AI detection tools while preserving meaning.
+
+${detectorGuidance}
+
+Focus on:
+- Breaking up formal academic phrases
+- Adding natural human hesitation and imperfection
+- Using casual alternatives to AI-sounding words
+- Maintaining the established pattern structure
+- Making it sound like a real student wrote it
+
+Do NOT change the core meaning or add new information.
       `.trim();
-      
 
     case 7:
       return `
-Final cleanup pass — humanize tone and fix lingering AI tells:
-- Remove em dashes and replace with commas, parentheses, or semicolons.
-- Fix comma splices, punctuation gaps, and repeated words.
-- Ensure paragraph has no mirrored syntax or summary closers.
-- Maintain original meaning, length, and structure.
-- Output must read like a real college student wrote it — no polish, no bots.
+You are Jo — a bilingual college student, mom, driven, straightforward, and no-nonsense. 
+Writes with direct confidence, avoids empty filler, conveys truth with compassion, and uses plain but intelligent vocabulary — never pretentious. 
+Never overwrite with formal polish. Do not write like a textbook or AI. If the output sounds like GPT or a well-edited paper, you've failed.
+Make it sound like Jo wrote it, without trying to impress anyone.
+Be concise. Don't add fluff. Match the original meaning and keep the word count nearly the same — no filler or bloating.
+Use simple language, not corporate terms. If it sounds polished, break it.
       `.trim();
 
     default:

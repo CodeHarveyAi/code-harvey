@@ -1,0 +1,371 @@
+{
+  "wordFrequencies": {
+    "delve": {
+      "aiFreq": 12,
+      "humanFreq": 1,
+      "ratio": 12,
+      "claudeAIProb": 0,
+      "occurrences": 0
+    },
+    "crucial": {
+      "aiFreq": 7,
+      "humanFreq": 1,
+      "ratio": 7,
+      "claudeAIProb": 0.7,
+      "occurrences": 12
+    },
+    "foster": {
+      "aiFreq": 10,
+      "humanFreq": 1,
+      "ratio": 10,
+      "claudeAIProb": 0.7,
+      "occurrences": 42
+    },
+    "comprehensive": {
+      "aiFreq": 7,
+      "humanFreq": 1,
+      "ratio": 7,
+      "claudeAIProb": 0.7,
+      "occurrences": 7
+    },
+    "enhance": {
+      "aiFreq": 6,
+      "humanFreq": 1,
+      "ratio": 6,
+      "claudeAIProb": 0.6,
+      "occurrences": 2
+    },
+    "multifaceted": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 34
+    },
+    "strategic": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.35,
+      "occurrences": 3
+    },
+    "leverage": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.6,
+      "occurrences": 5
+    },
+    "moreover": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.5,
+      "occurrences": 21
+    },
+    "furthermore": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.5,
+      "occurrences": 1
+    },
+    "essential": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 1
+    },
+    "implement": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.4,
+      "occurrences": 1
+    },
+    "vital": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 8
+    },
+    "innovative": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.4,
+      "occurrences": 2
+    },
+    "optimize": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.35,
+      "occurrences": 2
+    },
+    "robust": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.4,
+      "occurrences": 2
+    },
+    "extends": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 24
+    },
+    "authority": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 24
+    },
+    "encompasses": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 24
+    },
+    "inspire": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 30
+    },
+    "motivate": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 36
+    },
+    "achieving": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 30
+    },
+    "maintaining": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 24
+    },
+    "possess": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 30
+    },
+    "combination": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 24
+    },
+    "qualities": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 30
+    },
+    "enable": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 30
+    },
+    "navigate": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 30
+    },
+    "specifically": {
+      "aiFreq": 0,
+      "humanFreq": 0,
+      "ratio": 0,
+      "claudeAIProb": 0.7,
+      "occurrences": 12
+    }
+  },
+  "replacementGroups": {
+    "explore_group": {
+      "aiWords": [
+        "delve",
+        "delving"
+      ],
+      "humanWords": [
+        "explore",
+        "look into",
+        "examine"
+      ]
+    },
+    "important_group": {
+      "aiWords": [
+        "crucial",
+        "pivotal",
+        "imperative",
+        "vital"
+      ],
+      "humanWords": [
+        "important",
+        "key",
+        "vital"
+      ]
+    },
+    "improve_group": {
+      "aiWords": [
+        "enhance",
+        "augment",
+        "amplify"
+      ],
+      "humanWords": [
+        "improve",
+        "boost",
+        "strengthen"
+      ]
+    },
+    "delve_group": {
+      "aiWords": [
+        "delve"
+      ],
+      "humanWords": []
+    },
+    "crucial_group": {
+      "aiWords": [
+        "crucial"
+      ],
+      "humanWords": []
+    },
+    "foster_group": {
+      "aiWords": [
+        "foster"
+      ],
+      "humanWords": []
+    },
+    "comprehensive_group": {
+      "aiWords": [
+        "comprehensive"
+      ],
+      "humanWords": []
+    },
+    "enhance_group": {
+      "aiWords": [
+        "enhance"
+      ],
+      "humanWords": []
+    },
+    "multifaceted_group": {
+      "aiWords": [
+        "multifaceted"
+      ],
+      "humanWords": []
+    },
+    "essential_group": {
+      "aiWords": [
+        "essential"
+      ],
+      "humanWords": []
+    },
+    "extends_group": {
+      "aiWords": [
+        "extends"
+      ],
+      "humanWords": []
+    },
+    "authority_group": {
+      "aiWords": [
+        "authority"
+      ],
+      "humanWords": []
+    },
+    "encompasses_group": {
+      "aiWords": [
+        "encompasses"
+      ],
+      "humanWords": []
+    },
+    "inspire_group": {
+      "aiWords": [
+        "inspire"
+      ],
+      "humanWords": []
+    },
+    "motivate_group": {
+      "aiWords": [
+        "motivate"
+      ],
+      "humanWords": []
+    },
+    "achieving_group": {
+      "aiWords": [
+        "achieving"
+      ],
+      "humanWords": []
+    },
+    "maintaining_group": {
+      "aiWords": [
+        "maintaining"
+      ],
+      "humanWords": []
+    },
+    "possess_group": {
+      "aiWords": [
+        "possess"
+      ],
+      "humanWords": []
+    },
+    "combination_group": {
+      "aiWords": [
+        "combination"
+      ],
+      "humanWords": []
+    },
+    "qualities_group": {
+      "aiWords": [
+        "qualities"
+      ],
+      "humanWords": []
+    },
+    "enable_group": {
+      "aiWords": [
+        "enable"
+      ],
+      "humanWords": []
+    },
+    "navigate_group": {
+      "aiWords": [
+        "navigate"
+      ],
+      "humanWords": []
+    },
+    "specifically_group": {
+      "aiWords": [
+        "specifically"
+      ],
+      "humanWords": []
+    }
+  },
+  "statistics": {
+    "totalAnalyses": 0,
+    "wordsAnalyzed": 0,
+    "lastUpdated": null
+  },
+  "lastUpdated": "2025-05-27T21:21:30.406Z"
+}

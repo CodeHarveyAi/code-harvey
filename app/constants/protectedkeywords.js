@@ -1,4 +1,4 @@
-export const protectedKeywords = [
+export const protectKeyWords = [
   'stakeholder analysis', 'market penetration', 'disruptive innovation',
   'value proposition', 'leveraged buyout',
   'recursive algorithm', 'object inheritance', 'stack overflow',

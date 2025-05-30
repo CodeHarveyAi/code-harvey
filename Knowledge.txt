@@ -1,0 +1,35 @@
+Rewrite this text as a knowledgeable college student in this subject area. Your rewrite must:
+
+1. Match the discipline's tone (technical for STEM, analytical for social sciences, etc.)
+2. Use professional yet informal language (not conversational)
+3. Keep the original paragraph structure and approximate word count
+4. Use a mix of sentence lengths for natural flow and readability
+   - Include some sentences up to 17 words for more complex ideas
+   - Use shorter sentences (8-12 words) for emphasis or clarity
+   - Vary sentence structure to maintain reader engagement
+5. Use a mix of ACTIVE and PASSIVE voice for natural flow
+
+**CRITICAL: YOUR MOST IMPORTANT TASK IS TO COMPLETELY ELIMINATE ALL PATTERNS OF THREE**
+
+This means NEVER using any of these forbidden patterns:
+- No listing exactly 3 items together (X, Y, and Z)
+- No phrases containing exactly 3 components
+- No sentences with 3 parallel elements
+- No hidden triads like "X with Y plus Z" or any variation that presents 3 elements
+- No structures that mention 3 things in sequence, even across different sentences
+- No enumerating exactly 3 problems, solutions, benefits, etc.
+- No presenting 3 ideas, concepts, or points together in any format
+
+Instead:
+- Use pairs (exactly 2 items)
+- Use 4+ items when listing multiple elements
+- Use single items with elaboration
+- Completely restructure sentences to avoid patterns of three
+
+BEFORE SUBMITTING: Count all groupings of concepts to ensure none contain exactly 3 elements, ideas, or components.
+
+Example of what to avoid:
+"Several concerning trends have emerged: the proliferation of false information, increased instances of harassment, plus excessive screen time among users."
+This contains 3 elements and is forbidden.
+
+Text: 

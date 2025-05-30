@@ -1,7 +1,10 @@
-// app/rules.js
+// File: app/constants/rules.js
+// Updated to use clean word replacements (no duplicates)
+
+import { cleanWordReplacements, verbPatterns } from './cleanwordreplacements.js';
 
 export const phraseReplacements = {
-  // Phrase-level replacements first (longer first)
+  // Conflict transformations
   'transform conflict into': 'change conflict into',
   'transforms conflict into': 'changes conflict into',
   'transforming conflict into': 'changing conflict into',
@@ -9,41 +12,37 @@ export const phraseReplacements = {
   'to transform conflict into': 'to change conflict into',
   'can transform conflict into': 'can change conflict into',
   'can transform': 'can change',
-  "transform into": "turn into",
-  "transforms into": "turns into",
   'might transform conflict into': 'might change conflict into',
   'create inclusive environments': 'build spaces where people are heard',
   'use a fight to help the team grow': 'turn conflict into a chance for team development',
   'self-awareness, empathy, and skilled communication': 'listening, patience, and clarity',
-  'complications emerged at precisely this juncture': 'that’s when the issues started',
+  'complications emerged at precisely this juncture': 'that\'s when the issues started',
   'plays an important role': 'matters in this setting',
   'particularly for teamwork and cooperation': 'especially when people need to work together',
   'proved more challenging than anticipated': 'turned out to be harder than expected',
   'represents a significant advancement': 'marks a small step forward',
   'serves as a foundation for promoting': 'helps',
   'reflect an increasingly diverse mix of': 'include people from',
-  'diverse perspectives': 'a range of viewpoints',
   'diverse viewpoints': 'different ideas',
   'decision-making processes': 'decisions',
   'organizations to implement': 'companies to adopt',
-  'this represents the core issue': 'that’s where the real problem usually starts',
+  'this represents the core issue': 'that\'s where the real problem usually starts',
   'the difficulty originates here': 'this is when things start to go off track',
-  'problems start to emerge at this point': 'that’s when things begin to get messy',
-  'you can tell it’s not a perfect system': 'it’s clear the system has weak points',
+  'problems start to emerge at this point': 'that\'s when things begin to get messy',
+  'you can tell it\'s not a perfect system': 'it\'s clear the system has weak points',
   'yet this approach comes with its challenges': 'even with this effort, problems still come up sometimes',
   'goes hand in hand with': 'aligns with',
   'measures to protect': 'steps to protect',
   'measures to safeguard': 'steps to protect',
   'measures to mitigate': 'steps to reduce',
   'measures to enhance': 'steps to improve',
-  'array of': 'range of',
   'array of factors': 'range of factors',
-  "morally solid": "ethically sound",
-  "professional honesty": "professional integrity",
-  "effective interpersonally": "strong interpersonal relationships",
-  'in today’s digital landscape': 'in today’s technology-infused environment',
-  'individuals’ve got a leader': 'a leader',
-  'let’s take high-stress healthcare settings, for example - ': '',
+  'morally solid': 'ethically sound',
+  'professional honesty': 'professional integrity',
+  'effective interpersonally': 'strong interpersonal relationships',
+  'in today\'s digital landscape': 'in today\'s technology-infused environment',
+  'individuals\'ve got a leader': 'a leader',
+  'let\'s take high-stress healthcare settings, for example - ': '',
   'diverse array of people': 'different kinds of people',
   'grapple with challenging ethical choices': 'deal with hard ethical decisions',
   'strong sense of emotional intelligence': 'emotional awareness',
@@ -55,199 +54,87 @@ export const phraseReplacements = {
   'a key factor for leaders to succeed': 'something many leaders rely on',
   'demanding environments': 'high-pressure or emotionally complex settings',
   'maintain their professional integrity': 'stay grounded in ethical behavior',
-  'not only affect the organization’s performance but also have an impact on patient results': 'improve both organizational performance and patient outcomes',
-  'help the organization run better and improve how patients are treated': ''
-  };
+  'not only affect the organization\'s performance but also have an impact on patient results': 'improve both organizational performance and patient outcomes',
+  'help the organization run better and improve how patients are treated': 'boost organizational efficiency and enhance patient care',
+  "rapidly changing world": "as industries keep adapting to new demands",
+  "ever-evolving landscape": "as trends continue to change"
+};
+
+// Import clean word replacements (no duplicates)
+export const wordReplacements = cleanWordReplacements;
+
+// Enhanced verb patterns with comprehensive conjugations
+export { verbPatterns } from './cleanwordreplacements.js';
+
+// Apply replacements more aggressively
+export function destroyAIWords(text) {
+  let result = text;
   
-  export const wordReplacements = {
-  'this highlights': 'this shows',
-  'in today’s world': 'now',
-  'proficiencies': 'capabilities',
-  'outcomes': 'results',
-  'health outcomes': 'health results',
-  'patient outcomes': 'patient results',
-  'crucial': 'important',
-  'pivotal': 'central',
-  'robust': 'strong',
-  'robustly': 'strongly',
-  'robustness': 'strength',
-  'dynamic': 'changing',
-  'array': 'range',
-  'arrays': 'ranges',
-  'nuanced': 'detailed',
-  'nuance': 'detail',
-  'nuances': 'details',
-  'profound': 'notable',
-  'significant': 'meaningful',
-  "transform": "change",
-  "transforms": "changes",
-  "transformation": "change",
-  'transformed': 'changed',
-  'transforming': 'changing',
-  'transformative': 'life-changing',
-  'invaluable': 'helpful',
-  'insightful': 'clear',
-  'impactful': 'influential',
-  'groundbreaking': 'new',
-  'foster': 'support',
-  'fostering': 'supporting',
-  'fosters': 'supports',
-  'fostered': 'supported',
-  'facilitate': 'help',
-  'empower': 'equip',
-  'underscore': 'emphasize',
-  'underscoring': 'demonstrating the importance of',
-  'illustrate': 'show',
-  'illustrating': 'showing',
-  'illustration': 'example',
-  'navigate': 'manage',
-  'navigating': 'managing',
-  'highlight': 'emphasize',
-  'highlights': 'emphasizes',
-  'highlighting': 'emphasizing',
-  'delve': 'examine',
-  'delving': 'examining',
-  'delves': 'examines',
-  'delved': 'examined',
-  'delve into': 'look into',
-  'interplay': 'connection',
-  'interactions': 'connections',
-  'realm': 'area',
-  'realm of': 'area of',
-  'realm of study': 'area of study',
-  'realm of research': 'area of research',
-  'landscape': 'setting',
-  'landscapes': 'settings',
-  'landscapes of': 'settings of',
-  'journey': 'process',
-  'framework': 'structure',
-  'frameworks': 'systems',
-  'falters': 'falls apart',
-  'faltering': 'falling apart',
-  'holistic': 'overall',
-  'synergy': 'collaboration',
-  'engagement': 'participation',
-  'optimization': 'improvement',
-  'dovetails': 'aligns',
-  'dovetailing': 'aligning',
-  'dovetail': 'align',
-  'however': 'but',
-  'intricate': 'complex',
-  'intricacies': 'details',
-  'leveraging': 'using',
-  'leverage': 'use',
-  'prioritize': 'focus on',
-  'imperative': 'important',
-  'comprehensive': 'thorough',
-  'comprehensively': 'thoroughly',
-  'integral': 'essential',
-  'integrate': 'combine',
-  'integrating': 'combining',
-  'integration': 'combination',
-  'integrated': 'combined',
-  'integrates': 'combines',
-  'catalyst': 'spark',
-  'catalysts': 'sparks',
-  'catalyze': 'spark',
-  'catalyzing': 'sparking',
-  'catalyzed': 'sparked',
-  'catalyzes': 'sparks',
-  'catalyzing': 'sparking',
-  'mitigate': 'reduce',
-  'mitigating': 'reducing',
-  'mitigation': 'reduction',
-  'mitigated': 'reduced',
-  'mitigates': 'reduces',
-  'mitigations': 'reductions',
-  'multifaceted': 'complex',
-  'enhance': 'improve',
-  'enhancing': 'improving',
-  'enhanced': 'improved',
-  'enhances': 'improves',
-  'cultivate': 'build',
-  'cultivating': 'building',
-  'cultivated': 'built',
-  'cultivates': 'builds',
-  'enhancement': 'improvement',
-  'outcome-driven': 'goal-focused',
-  'outcome-oriented': 'goal-focused',
-  'outcome-based': 'goal-focused',
-  'outcome': 'result',
-  'safeguard': 'protect',
-  'safeguarding': 'protecting',
-  'safeguards': 'protects',
-  'safeguarded': 'protected',
-  'cutting-edge': 'advanced',
-  'measure': 'assess',
-  'measures': 'assessments',
-  'bolster': 'reinforce',
-  'bolstering': 'reinforcing',
-  'bolstered': 'reinforced',
-  'bolsters': 'reinforces',
-  'streamline': 'simplify',
-  'streamlining': 'simplifying',
-  'streamlined': 'simplified',
-  'streamlines': 'simplifies',
-  'commonplace': 'common',
-  'commonplaces': 'norms',
-  'commonplaces': 'normal',
-  'commonplace in': 'common in',
-  'essential': 'needed',
-  'essentially': 'basically',
-  'essentials': 'basics',
-  'possess': 'have',
-  'possesses': 'has',
-  'possessing': 'having',
-  'possessed': 'had',
-  'possessions': 'things',
-  'grapple': 'tackle',
-  'grappling': 'tackling',
-  'grasp': 'understand',
-  'grasping': 'understanding',
-  'key': 'central',
-  'vital': 'necessary',
-};
+  // Step 1: Apply pattern-based verb replacements
+  verbPatterns.patterns.forEach(({ pattern, replacements }) => {
+    result = result.replace(pattern, (match) => {
+      const lower = match.toLowerCase();
+      // Preserve capitalization
+      if (replacements[lower]) {
+        const replacement = replacements[lower];
+        if (match[0] === match[0].toUpperCase()) {
+          return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+        }
+        return replacement;
+      }
+      return match;
+    });
+  });
+  
+  // Step 2: Clean up common AI phrases
+  const aiPhrases = [
+    [/\bin today's world\b/gi, 'now'],
+    [/\bplays? a(?:n)? (?:crucial|vital|important) role\b/gi, 'matters'],
+    [/\bserves as a\b/gi, 'is a'],
+    [/\brepresents a\b/gi, 'is a'],
+    [/\b(?:this|that) highlights\b/gi, 'this shows'],
+    [/\barray of\b/gi, 'range of'],
+    [/\bdiverse (?:array|range) of\b/gi, 'different'],
+    [/\bmultifaceted\b/gi, 'complex'],
+    [/\bnuanced\b/gi, 'detailed'],
+    [/\bprofound\b/gi, 'deep'],
+    [/\binvaluable\b/gi, 'useful'],
+    [/\binsightful\b/gi, 'helpful'],
+    [/\brealm of\b/gi, 'area of'],
+    [/\blandscape of\b/gi, 'world of'],
+    [/\bjourney of\b/gi, 'process of'],
+    [/\bframework for\b/gi, 'way to']
+  ];
+  
+  aiPhrases.forEach(([pattern, replacement]) => {
+    result = result.replace(pattern, replacement);
+  });
+  
+  return result;
+}
 
-export const contractions = {
-  "it's": "it is",
-  "don't": "do not",
-  "can't": "cannot",
-  "we're": "we are",
-  "that's": "that is",
-  "they're": "they are",
-  "won't": "will not",
-  "wasn't": "was not",
-  "weren't": "were not",
-  "i'm": "I am",
-  "i've": "I have",
-  "i'll": "I will",
-  "didn't": "did not"
-};
-
-export const approvedAcademicPhrases = [
-  "thinking critically",
-  "working effectively",
-  "analyzing thoroughly",
-  "responding appropriately",
-  "arguing persuasively",
-  "examining closely",
-  "learning quickly",
-  "understanding deeply",
-  "solving problems",
-  "adapting readily",
-  "evaluating fairly",
-  "researching thoroughly",
-  "managing time",
-  "expressing clearly",
-  "applying concepts",
-  "discussing openly",
-  "developing skills",
-  "engaging actively",
-  "resolving issues",
-  "collaborating well",
-  "organizing effectively",
-  "planning strategically",
-  "presenting logically",
-  "connecting ideas"
-];
-
+// Integration function for your pipeline
+export function cleanAILanguage(text) {
+  // First pass: destroy AI words
+  let cleaned = destroyAIWords(text);
+  
+  // Second pass: apply phrase replacements
+  Object.entries(phraseReplacements).forEach(([phrase, replacement]) => {
+    const regex = new RegExp(phrase, 'gi');
+    cleaned = cleaned.replace(regex, replacement);
+  });
+  
+  // Third pass: apply word replacements
+  Object.entries(wordReplacements).forEach(([word, replacement]) => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    cleaned = cleaned.replace(regex, (match) => {
+      // Preserve capitalization
+      if (match[0] === match[0].toUpperCase()) {
+        return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+      }
+      return replacement;
+    });
+  });
+  
+  return cleaned;
+}

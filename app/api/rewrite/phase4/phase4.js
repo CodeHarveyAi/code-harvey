@@ -1,61 +1,70 @@
-// /app/api/rewrite/phase4/phase4.js
+// File: app/phases/runPhase4.js
 
-import { runHumanizerPass } from '@/lib/middleware.js';
-import {
-  applyPhraseReplacements,
-  applyWordReplacements
-} from '@/lib/filters.js';
-import { patchTransitions } from '@/lib/transitionpatcher.js';
+import { patchTransitions, finalizeTransitions } from '@/lib/transitionpatcher.js';
 import { softGrammarFix } from '@/lib/grammarfix.js';
+import { cleanPatterns } from '@/lib/cleanpatterns.js';
+import { sanitizeMisusedTransitions } from '@/lib/transitionvalidator.js';
+import { detectTransitions, replaceAITransitions } from '@/lib/transitiondetector.js';
 
-/**
- * Phase 4: Transition Repair + Phrase Cleanup + Soft Grammar Stitching
- * Adds soft disruptions, cleans robotic phrases, and stitches broken transitions.
- */
 export async function runPhase4(text) {
   if (!text || typeof text !== 'string' || text.trim() === '') {
     console.warn('[Phase 4] ❌ Invalid input:', text);
     return '';
   }
 
+  // 0) First run the AI‐style → human transition swap
+  let output = replaceAITransitions(text);
+  console.log('[Phase 4] ✅ replaceAITransitions applied:', output);
+
+  // 1) If after that there’s nothing left to patch, skip
+  if (!detectTransitions(output)) {
+    console.log('[Phase 4] ⏩ No transitions detected. Skipping Phase 4.');
+    return output;
+  }
+
   try {
-    let output = text;
-    
-    // Step 1: Add natural disruptions
-    output = runHumanizerPass(output);
- 
-
-    // Step 2: Apply human-friendly phrase and word replacements
-    output = applyPhraseReplacements(output);
-  
-
-    output = applyWordReplacements(output);
-  
-    // ✅ Step 3: Patch transitions with soft options
+    // 2) Patch the remaining transitions to more natural ones
     output = patchTransitions(output, {
       contrast: true,
       result: true,
       addition: true,
-      emphasis: true
+      clarification: true,
+      sequence: true,
+      summary: true,
+      reason: true,
+      emphasis: true,
+      dropRate: 0.15,
+      informalRatio: 0.65,
+      softPunctuation: true
     });
+    console.log('[Phase 4] ✅ Transition patching complete');
 
+    // 3) Drop any mis‐used transitions
+    output = sanitizeMisusedTransitions(output);
+    console.log('[Phase 4] ✅ Transition context check complete');
 
-    // Step 4: Soft grammar patching to fix broken joins and awkward insertions
+    // 4) Clean up any leftover patterns/hedges
+    output = cleanPatterns(output);
+    console.log('[Phase 4] ✅ Clean patterns pass complete');
+
+    // 5) Light grammar stitch
     output = await softGrammarFix(output);
-  
+    console.log('[Phase 4] ✅ Soft grammar stitching complete');
 
-    // Step 5: Light punctuation and spacing cleanup
-    output = output.replace(/\s{2,}/g, ' ');
-    output = output.replace(/\s+([.,!?])/g, '$1');
-    output = output.replace(/([.,!?])(?=[^\s])/g, '$1 ');
-    output = output.replace(/\s*-\s*/g, '-');
-    output = output.trim();
+    // 6) Restore our inline [[TRANS:…]] markers
+    output = finalizeTransitions(output);
+    // 7) Final punctuation/spacing cleanup
+    output = output
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+([.,!?])/g, '$1')
+      .replace(/([.,!?])(?=[^\s])/g, '$1 ')
+      .replace(/\s*-\s*/g, '-')
+      .trim();
 
-   
+    console.log('[Phase 4] ✅ Final transition pass complete');
     return output;
-
   } catch (err) {
     console.error('[Phase 4] ❌ Processing Error:', err.message);
-    return String(text || '');
+    return text;
   }
 }

@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     './app/**/*.{js,ts,jsx,tsx}', // includes all JS/TS/React files inside `app` folder
     './pages/**/*.{js,ts,jsx,tsx}', // if you have a pages folder
@@ -9,4 +9,4 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-}
+};
